@@ -1,0 +1,32 @@
+server:
+  port: 10000
+
+#Database Configuration
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/payments
+    username: root
+    password: me@2023
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      naming:
+        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+      ddl-auto: update # or create-drop, create, none
+      properties:
+        hibernate:
+          jdbc:
+            batch_size: 50 # set batch size for batch inserts/updates
+
+
+
+
+# M-PESA Configurations
+mpesa:
+  app:
+    consumer:
+      key:
+      secret:
+      passKey: 
