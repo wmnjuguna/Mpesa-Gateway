@@ -21,15 +21,7 @@ public class MpesaActions {
     @Autowired
     private RestTemplate template;
 
-    @Autowired
-    private RestTemplate template;
-
-    @Value("${mpesa.app.consumer.key}")
-    private String consumerKey;
-    @Value("${mpesa.app.consumer.secret}")
-    private String consumerSecret;
-
-    public AuthorizationResponse authenticate() {
+    public AuthorizationResponse authenticate(String consumerSecret, String consumerKey) {
         String appKeySecret = consumerKey + ":" + consumerSecret;
         byte[] bytes = appKeySecret.getBytes(StandardCharsets.ISO_8859_1);
         String encoded = Base64.getEncoder().encodeToString(bytes);
@@ -44,8 +36,8 @@ public class MpesaActions {
         return response.getBody();
     }
 
-    public MpesaExpressResponseDTO lipaNaMpesaOnline(MpesaExpressRequestDTO request){
-        AuthorizationResponse response = authenticate();
+    public MpesaExpressResponseDTO lipaNaMpesaOnline(MpesaExpressRequestDTO request, String consumerSecret, String consumerKey){
+        AuthorizationResponse response = authenticate(consumerSecret, consumerKey);
         if (Objects.isNull(response)) {
             log.error("M-PESA Authorization could not be done");
         }
