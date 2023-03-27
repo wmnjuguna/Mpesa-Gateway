@@ -21,6 +21,9 @@ public class PaybillConfigService {
         paybillConfig.setConsumerKey(Base64.getEncoder().encodeToString(paybillConfig.getConsumerKey().getBytes(StandardCharsets.UTF_8)));
         paybillConfig.setConsumerSecret(Base64.getEncoder().encodeToString(paybillConfig.getConsumerSecret().getBytes(StandardCharsets.UTF_8)));
         paybillConfig.setPassKey(Base64.getEncoder().encodeToString(paybillConfig.getPassKey().getBytes(StandardCharsets.UTF_8)));
+        paybillConfig.setConfirmationUrl(Base64.getEncoder().encodeToString(paybillConfig.getConfirmationUrl.getBytes(StandardCharsets.UTF_8)));
+        paybillConfig.setValidationUrl(Base64.getEncoder().encodeToString(paybillConfig.getValidationUrl.getBytes(StandardCharsets.UTF_8)));
+        paybillConfig.setStkCallbackUrl(Base64.getEncoder().encodeToString(paybillConfig.getStkCallbackUrl.getBytes(StandardCharsets.UTF_8)));
         return paybillConfigRepository.save(paybillConfig);
     }
 
