@@ -1,5 +1,6 @@
 package app.fortuneconnect.payments.Models.Configuration;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.*;
 
