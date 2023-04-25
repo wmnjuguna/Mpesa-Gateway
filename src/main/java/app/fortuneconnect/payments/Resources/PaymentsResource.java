@@ -72,7 +72,7 @@ public class PaymentsResource {
                 );
     }
 
-    @GetMapping("configurations")
+    @GetMapping("configure-paybill")
     public ResponseEntity<ResponseTemplate> allConfigurations(@RequestParam(defaultValue = "0") int page,
                                                               @RequestParam(defaultValue = "20") int size)  {
         Pageable pageable = PageRequest.of(page, size);
