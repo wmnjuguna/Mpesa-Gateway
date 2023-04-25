@@ -15,6 +15,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.awt.print.Pageable;
+
 @CrossOrigin
 @RestController
 @RequestMapping("api/v1/mpesa")
@@ -65,5 +67,15 @@ public class PaymentsResource {
                                 .message("Configuration created successfully")
                                 .build()
                 );
+    }
+
+    @GetMapping("configurations")
+    public ResponseEntity<ResponseTemplate> allConfigurations(Pageable pageable){
+        return ResponseEntity.ok().body(
+                ResponseTemplate.builder()
+                        .data(paybillConfigService.allConfigurations(pageable))
+                        .message("Data retrieved Successfully")
+                        .build()
+        );
     }
 }
