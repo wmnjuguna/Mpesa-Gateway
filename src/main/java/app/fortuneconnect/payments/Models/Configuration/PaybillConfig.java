@@ -1,5 +1,6 @@
 package app.fortuneconnect.payments.Models.Configuration;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -23,4 +24,10 @@ public class PaybillConfig {
     @Column(nullable = false)
     private String consumerKey;
     private String passKey;
+    @JsonProperty(access=JsonProperty.Access.WRITE_ONLY)
+    private String confirmationUrl;
+    @JsonProperty(access=JsonProperty.Access.WRITE_ONLY)
+    private String validationUrl;
+    @JsonProperty(access=JsonProperty.Access.WRITE_ONLY)
+    private String stkCallbackUrl;
 }
