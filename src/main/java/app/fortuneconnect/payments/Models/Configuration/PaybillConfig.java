@@ -1,8 +1,13 @@
 package app.fortuneconnect.payments.Models.Configuration;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+
+import java.util.Date;
 
 @Entity
 @NoArgsConstructor
@@ -30,4 +35,14 @@ public class PaybillConfig {
     private String validationUrl;
     @JsonProperty(access=JsonProperty.Access.WRITE_ONLY)
     private String stkCallbackUrl;
+    @CreatedDate
+    @Column(nullable = false, updatable = false)
+    @Temporal(TemporalType.TIMESTAMP)
+    @JsonIgnore
+    private Date createdAt;
+    @LastModifiedDate
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column( nullable = false)
+    @JsonIgnore
+    private Date updatedAt;
 }
