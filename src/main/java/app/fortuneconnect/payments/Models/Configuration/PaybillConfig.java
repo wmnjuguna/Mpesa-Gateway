@@ -35,11 +35,8 @@ public class PaybillConfig {
     private String consumerKey;
     @JsonProperty(access=JsonProperty.Access.WRITE_ONLY)
     private String passKey;
-    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String confirmationUrl;
-    @JsonProperty(access=JsonProperty.Access.WRITE_ONLY)
     private String validationUrl;
-    @JsonProperty(access=JsonProperty.Access.WRITE_ONLY)
     private String stkCallbackUrl;
     @CreationTimestamp
     @Column(nullable = false, updatable = false)
