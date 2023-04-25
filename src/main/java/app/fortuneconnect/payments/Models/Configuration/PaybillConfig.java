@@ -19,6 +19,7 @@ import java.util.Date;
 public class PaybillConfig {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @JsonProperty(access=JsonProperty.Access.WRITE_ONLY)
     private Long id;
     @Column(length = 36, nullable = false, unique = true)
     private String paybillUid;
@@ -27,11 +28,14 @@ public class PaybillConfig {
     @Column(length = 20, nullable = false)
     private String organisationName;
     @Column(nullable = false)
+    @JsonProperty(access=JsonProperty.Access.WRITE_ONLY)
     private String consumerSecret;
     @Column(nullable = false)
-    private String consumerKey;
-    private String passKey;
     @JsonProperty(access=JsonProperty.Access.WRITE_ONLY)
+    private String consumerKey;
+    @JsonProperty(access=JsonProperty.Access.WRITE_ONLY)
+    private String passKey;
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String confirmationUrl;
     @JsonProperty(access=JsonProperty.Access.WRITE_ONLY)
     private String validationUrl;
