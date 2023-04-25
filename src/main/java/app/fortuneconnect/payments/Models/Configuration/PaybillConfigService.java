@@ -1,10 +1,11 @@
 package app.fortuneconnect.payments.Models.Configuration;
 
 import app.fortuneconnect.payments.Exceptions.ResourceNotFoundException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import java.awt.print.Pageable;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.List;
@@ -39,7 +40,7 @@ public class PaybillConfigService {
         return this.paybillConfigRepository.findAll();
     }
 
-    public List<PaybillConfig> allConfigurations(Pageable pageable){
-        return this.paybillConfigRepository.findAll((Sort) pageable);
+    public Page<PaybillConfig> allConfigurations(Pageable pageable){
+        return this.paybillConfigRepository.findAll(pageable);
     }
 }
