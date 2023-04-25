@@ -74,9 +74,8 @@ public class PaymentsResource {
 
     @GetMapping("configurations")
     public ResponseEntity<ResponseTemplate> allConfigurations(@RequestParam(defaultValue = "0") int page,
-                                                              @RequestParam(defaultValue = "20") int size,
-                                                              @RequestParam(defaultValue = "createdAt,desc") String[] sort) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by(sort));
+                                                              @RequestParam(defaultValue = "20") int size)  {
+        Pageable pageable = PageRequest.of(page, size);
         return ResponseEntity.ok().body(
                 ResponseTemplate.builder()
                         .data(paybillConfigService.allConfigurations(pageable))
