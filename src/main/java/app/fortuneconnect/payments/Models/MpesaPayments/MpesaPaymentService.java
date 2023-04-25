@@ -51,10 +51,10 @@ public class MpesaPaymentService implements MpesaPaymentOperations {
                 .businessShortCode(stkPayment.getPaybill())
                 .partyA(stkPayment.getPhoneNo())
                 .partyB(stkPayment.getPaybill())
-                .callBackURL(new String(Base64.getDecoder().decode(config.gatStkCallbackUrl())))
+                .callBackURL(new String(Base64.getDecoder().decode(config.getStkCallbackUrl())))
                 .phoneNumber(stkPayment.getPhoneNo())
                 .timestamp(timeStamp)
-                .transactionDesc("STK from "+stkPayment.getPhoneNo)
+                .transactionDesc("STK from "+stkPayment.getPhoneNo())
                 .transactionType(CustomerBuyGoodsOnline.getTransactioType())
                 .password(
                         Base64.getEncoder().encodeToString(password.getBytes(StandardCharsets.ISO_8859_1)))
