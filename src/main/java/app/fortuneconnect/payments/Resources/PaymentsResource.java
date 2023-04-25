@@ -11,7 +11,9 @@ import app.fortuneconnect.payments.Models.MpesaPayments.MpesaPaymentService;
 import app.fortuneconnect.payments.Models.StkLogs.StkLog;
 import app.fortuneconnect.payments.Models.StkLogs.StkLogService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.data.web.SortDefault;
 import org.springframework.http.HttpStatus;
@@ -71,7 +73,10 @@ public class PaymentsResource {
     }
 
     @GetMapping("configurations")
-    public ResponseEntity<ResponseTemplate> allConfigurations(@PageableDefault(size = 20)Pageable pageable){
+    public ResponseEntity<ResponseTemplate> allConfigurations(@RequestParam(defaultValue = "0") int page,
+                                                              @RequestParam(defaultValue = "20") int size,
+                                                              @RequestParam(defaultValue = "createdAt,desc") String[] sort) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(sort));
         return ResponseEntity.ok().body(
                 ResponseTemplate.builder()
                         .data(paybillConfigService.allConfigurations(pageable))
@@ -79,4 +84,5 @@ public class PaymentsResource {
                         .build()
         );
     }
+
 }
