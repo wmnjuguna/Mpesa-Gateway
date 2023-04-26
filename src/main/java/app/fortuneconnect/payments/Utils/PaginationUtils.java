@@ -50,7 +50,7 @@ public class PaginationUtils<T> {
             links.add(lastLink);
         }
 
-        return new PagedResponse<>(content, currentPageNumber, pageable.getPageSize(), page.getTotalElements(), page.getTotalPages(),links, baseUrl);
+        return new PagedResponse<>(content, currentPageNumber, pageable.getPageSize(), page.getTotalElements(), links, baseUrl);
     }
 
     private static Method getDeclaredMethod(Class<?> clazz, String methodName, Class<?>... parameterTypes) {

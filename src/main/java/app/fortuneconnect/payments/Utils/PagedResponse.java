@@ -12,16 +12,14 @@ public class PagedResponse<T> {
     private int page;
     private int size;
     private long totalElements;
-    private int totalPages;
     List<Link> links;
     private String baseUrl;
 
-    public PagedResponse(List<T> content, int currentPageNumber, int pageSize, long totalElements, int totalPages, List<Link> links, String baseUrl) {
+    public PagedResponse(List<T> content, int currentPageNumber, int pageSize, long totalElements, List<Link> links, String baseUrl) {
         this.content = content;
         this.page = currentPageNumber;
         this.size = pageSize;
         this.totalElements = totalElements;
-        this.totalPages = totalPages;
         this.links = links;
         this.baseUrl = baseUrl;
     }
