@@ -9,8 +9,8 @@ import lombok.NoArgsConstructor;
 @Data @AllArgsConstructor @NoArgsConstructor
 @Builder
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class ResponseTemplate {
-    private Object data;
+public class ResponseTemplate<T> {
+    private T data;
     private String message;
     private String error;
 }
