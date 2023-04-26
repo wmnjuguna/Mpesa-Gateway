@@ -3,23 +3,35 @@ package app.fortuneconnect.payments.Utils;
 import app.fortuneconnect.payments.DTO.MpesaExpressRequestDTO;
 import app.fortuneconnect.payments.DTO.Responses.AuthorizationResponse;
 import app.fortuneconnect.payments.DTO.Responses.MpesaExpressResponseDTO;
-import app.fortuneconnect.payments.Utils.Const.Constants;
+import app.fortuneconnect.payments.DTO.URLRegistrationRequestDTO;
+import app.fortuneconnect.payments.DTO.URLRegistrationResponseDTO;
+import app.fortuneconnect.payments.Exceptions.AuthenticationFailed;
+import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
 import java.nio.charset.StandardCharsets;
-import java.time.Instant;
 import java.util.Base64;
-import java.util.Objects;
 
 @Component
 @Slf4j
 public class MpesaActions {
     @Autowired
     private RestTemplate template;
+
+    @Value("${payments.mpesa.stk-push-url}")
+    private String mpesaExpressUrl;
+
+    @Value("${payments.mpesa.authentication-url}")
+    private String authenticationUrl;
+
+    @Value("${payments.mpesa.url-registration}")
+    private String urlRegistrationUrl;
+
 
     public AuthorizationResponse authenticate(String consumerSecret, String consumerKey) {
         String appKeySecret = consumerKey + ":" + consumerSecret;
@@ -29,24 +41,38 @@ public class MpesaActions {
         headers.setBasicAuth(consumerSecret, consumerKey);
         headers.set("Authorization", "Basic " + encoded);
         HttpEntity<Void> requestEntity = new HttpEntity<>(headers);
-        ResponseEntity<AuthorizationResponse> response = template.exchange(Constants.sandboxAuthenticationUrl, HttpMethod.GET, requestEntity, AuthorizationResponse.class);
+        ResponseEntity<AuthorizationResponse> response = template.exchange(authenticationUrl, HttpMethod.GET, requestEntity, AuthorizationResponse.class);
         if(response.getStatusCode().isError()){
-            throw new RuntimeException("Could not authenticate with M-PESA");
+            throw new AuthenticationFailed();
         }
         return response.getBody();
     }
 
     public MpesaExpressResponseDTO lipaNaMpesaOnline(MpesaExpressRequestDTO request, String consumerSecret, String consumerKey){
         AuthorizationResponse response = authenticate(consumerSecret, consumerKey);
-        if (Objects.isNull(response)) {
-            log.error("M-PESA Authorization could not be done");
-        }
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.set("Authorization", "Bearer " + response.getAccessToken());
         HttpEntity<MpesaExpressRequestDTO> requestEntity = new HttpEntity<>(request, headers);
-        ResponseEntity<MpesaExpressResponseDTO> responseEntity = template.exchange(Constants.sandboxMpesaExpress, HttpMethod.POST, requestEntity, MpesaExpressResponseDTO.class);
+        ResponseEntity<MpesaExpressResponseDTO> responseEntity = template.exchange(mpesaExpressUrl, HttpMethod.POST, requestEntity, MpesaExpressResponseDTO.class);
         return responseEntity.getBody();
+    }
+
+    public void registerURl(@NonNull String consumerSecret, @NonNull String consumerKey, @NonNull String confirmationUrl,
+                            @NonNull String validationUrl, int shortCode, @NonNull String responseType){
+        AuthorizationResponse response =  authenticate(consumerSecret, consumerKey);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.set("Authorization", "Bearer " + response.getAccessToken());
+        URLRegistrationRequestDTO request = URLRegistrationRequestDTO.builder()
+                .confirmationURL(confirmationUrl)
+                .validationURL(validationUrl)
+                .shortCode(String.valueOf(shortCode))
+                .responseType(responseType)
+                .build();
+        HttpEntity<URLRegistrationRequestDTO> requestEntity = new HttpEntity<>(request, headers);
+        ResponseEntity<URLRegistrationResponseDTO> responseEntity = template.exchange(urlRegistrationUrl, HttpMethod.POST, requestEntity, URLRegistrationResponseDTO.class);
+        responseEntity.getBody();
     }
 
     public void bulkDisbursement(){
