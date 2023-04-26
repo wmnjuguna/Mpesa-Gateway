@@ -21,7 +21,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 @CrossOrigin
 @RestController
-@RequestMapping("api/v1/mpesa")
+@RequestMapping("api/v1/hela")
 public class PaymentsResource {
     @Autowired
     private MpesaPaymentService mpesaPaymentService;
