@@ -37,9 +37,13 @@ public class PaybillConfigService {
         return paybillConfigRepository.save(paybillConfig);
     }
 
-    public PaybillConfig retrievePaybillConfiguration(String uid){
-        return this.paybillConfigRepository.findByPaybillUid(uid)
+    public PaybillConfig retrievePaybillConfiguration(String uid, String finder){
+        if(finder.equalsIgnoreCase("uid"){
+           return this.paybillConfigRepository.findByPaybillUid(uid)
                 .orElseThrow(() -> new ResourceNotFoundException("Paybill Could not be found"));
+        }else{
+            return 
+        }
     }
 
     public PaybillConfig update(PaybillConfig paybillConfig){
