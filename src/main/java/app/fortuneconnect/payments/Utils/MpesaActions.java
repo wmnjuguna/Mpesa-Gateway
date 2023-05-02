@@ -40,7 +40,7 @@ public class MpesaActions {
         headers.setBasicAuth(consumerSecret, consumerKey);
         headers.set("Authorization", "Basic " + encoded);
         HttpEntity<Void> requestEntity = new HttpEntity<>(headers);
-        ResponseEntity<AuthorizationResponse> response = template.exchange(authenticationUrl, HttpMethod.GET, requestEntity, AuthorizationResponse.class);
+        ResponseEntity<AuthorizationResponse> response = template.exchange("https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials", HttpMethod.GET, requestEntity, AuthorizationResponse.class);
         log.info("{}", response);
         return response.getBody();
     }
