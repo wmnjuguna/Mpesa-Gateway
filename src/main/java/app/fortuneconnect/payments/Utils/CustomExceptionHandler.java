@@ -40,7 +40,7 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
         );
     }
 
-    @ExceptionHandler(value = { NullPointerException.class })
+//    @ExceptionHandler(value = { NullPointerException.class })
     public ResponseEntity<ResponseTemplate<?>> handleCustomException(NullPointerException ex) {
         return  ResponseEntity.status(HttpStatus.UNAUTHORIZED.value()).body(ResponseTemplate.builder()
                 .error(ex.getMessage())
