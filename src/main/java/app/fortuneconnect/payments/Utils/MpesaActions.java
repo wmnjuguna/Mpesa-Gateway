@@ -33,20 +33,19 @@ public class MpesaActions {
     private String urlRegistrationUrl;
 
 
-    public AuthorizationResponse authenticate(String consumerSecret, String consumerKey) {
-        String appKeySecret = consumerKey + ":" + consumerSecret;
-        byte[] bytes = appKeySecret.getBytes(StandardCharsets.ISO_8859_1);
-        String encoded = Base64.getEncoder().encodeToString(bytes);
-        HttpHeaders headers = new HttpHeaders();
-        headers.setBasicAuth(consumerSecret, consumerKey);
-        headers.set("Authorization", "Basic " + encoded);
-        HttpEntity<Void> requestEntity = new HttpEntity<>(headers);
-        ResponseEntity<AuthorizationResponse> response = template.exchange(authenticationUrl, HttpMethod.GET, requestEntity, AuthorizationResponse.class);
-        if(response.getStatusCode().isError()){
-            throw new AuthenticationFailed();
-        }
-        return response.getBody();
+public AuthorizationResponse authenticate(String consumerKey, String consumerSecret) {
+    String appKeySecret = consumerKey + ":" + consumerSecret;
+    byte[] bytes = appKeySecret.getBytes(StandardCharsets.ISO_8859_1);
+    HttpHeaders headers = new HttpHeaders();
+    headers.setBasicAuth(consumerKey, consumerSecret);
+    headers.set("Authorization", "Basic " + Base64.getEncoder().encodeToString(bytes));
+    HttpEntity<Void> requestEntity = new HttpEntity<>(headers);
+    ResponseEntity<AuthorizationResponse> response = template.exchange(authenticationUrl, HttpMethod.GET, requestEntity, AuthorizationResponse.class);
+    if (!response.getStatusCode().is2xxSuccessful()) {
+        throw new AuthenticationFailed();
     }
+    return response.getBody();
+}
 
     public MpesaExpressResponseDTO lipaNaMpesaOnline(MpesaExpressRequestDTO request, String consumerSecret, String consumerKey){
         AuthorizationResponse response = authenticate(consumerSecret, consumerKey);
