@@ -52,6 +52,7 @@ public class PaybillConfigService {
                 .map(paybillConfig1 -> {
                     paybillConfig1.setConfirmationUrl(paybillConfig.getConfirmationUrl());
                     paybillConfig1.setValidationUrl(paybillConfig.getValidationUrl());
+                    paybillConfig1.setStkCallbackUrl(paybillConfig.getStkCallbackUrl());
                     return this.paybillConfigRepository.save(paybillConfig1); // save the updated object
                 })
                 .orElseThrow(() -> new ResourceNotFoundException("Paybill could not be found"));
