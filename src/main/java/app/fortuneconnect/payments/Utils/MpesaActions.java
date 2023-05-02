@@ -34,7 +34,7 @@ public class MpesaActions {
 
 
     public AuthorizationResponse authenticate(String consumerSecret, String consumerKey) {
-        String appKeySecret = consumerKey + ":" + consumerSecret;
+        String appKeySecret = consumerSecret + ":" + consumerKey;
         String encoded = Base64.getEncoder().encodeToString(appKeySecret.getBytes(StandardCharsets.UTF_8));
         log.info("Credentials {}", encoded);
         HttpHeaders headers = new HttpHeaders();
