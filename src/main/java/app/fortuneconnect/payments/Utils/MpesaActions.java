@@ -34,6 +34,7 @@ public class MpesaActions {
 
 
 public AuthorizationResponse authenticate(String consumerKey, String consumerSecret) {
+    log.info("URI {}", authenticationUrl);
     String appKeySecret = consumerKey + ":" + consumerSecret;
     byte[] bytes = appKeySecret.getBytes(StandardCharsets.ISO_8859_1);
     HttpHeaders headers = new HttpHeaders();
