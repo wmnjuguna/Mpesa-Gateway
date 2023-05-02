@@ -50,9 +50,9 @@ public class PaybillConfigService {
     public PaybillConfig update(PaybillConfig paybillConfig){
         return this.paybillConfigRepository.findByPaybillUid(paybillConfig.getPaybillUid())
                 .map(paybillConfig1 -> {
-                    paybillConfig1.setConfirmationUrl(paybillConfig.getConfirmationUrl());
-                    paybillConfig1.setValidationUrl(paybillConfig.getValidationUrl());
-                    paybillConfig1.setStkCallbackUrl(paybillConfig.getStkCallbackUrl());
+                    paybillConfig1.setConfirmationUrl(Base64.getEncoder().encodeToString(paybillConfig.getConfirmationUrl().getBytes(StandardCharsets.UTF_8)));
+                    paybillConfig1.setValidationUrl(Base64.getEncoder().encodeToString(paybillConfig.getValidationUrl().getBytes(StandardCharsets.UTF_8)));
+                    paybillConfig1.setStkCallbackUrl(Base64.getEncoder().encodeToString(paybillConfig.getStkCallbackUrl().getBytes(StandardCharsets.UTF_8)));
                     return this.paybillConfigRepository.save(paybillConfig1); // save the updated object
                 })
                 .orElseThrow(() -> new ResourceNotFoundException("Paybill could not be found"));
