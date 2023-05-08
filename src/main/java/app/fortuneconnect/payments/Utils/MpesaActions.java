@@ -39,6 +39,7 @@ public class MpesaActions {
         HttpEntity<Void> requestEntity = new HttpEntity<>(headers);
         ResponseEntity<AuthorizationResponse> response = template.exchange(authenticationUrl, HttpMethod.GET, requestEntity, AuthorizationResponse.class);
         if(!response.getStatusCode().is2xxSuccessful()){
+            log.error("Key {} Secret {} Headers {} url {}", consumerKey, consumerSecret, headers, authenticationUrl);
             throw new AuthenticationFailed();
         }
         return response.getBody();
