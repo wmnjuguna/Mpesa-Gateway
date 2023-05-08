@@ -39,7 +39,6 @@ public class MpesaActions {
         HttpEntity<Void> requestEntity = new HttpEntity<>(headers);
         ResponseEntity<AuthorizationResponse> response = template.exchange(authenticationUrl, HttpMethod.GET, requestEntity, AuthorizationResponse.class);
         if(!response.getStatusCode().is2xxSuccessful()){
-            log.error("Key {} Secret {} Headers {} url {}", consumerKey, consumerSecret, headers, authenticationUrl);
             throw new AuthenticationFailed();
         }
         return response.getBody();
@@ -63,7 +62,7 @@ public class MpesaActions {
         AuthorizationResponse response =  authenticate(consumerSecret, consumerKey);
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.set("Authorization", "Bearer " + response.getAccessToken());
+        headers.set("Authorization", "Basic " + response.getAccessToken());
         URLRegistrationRequestDTO request = URLRegistrationRequestDTO.builder()
                 .confirmationURL(confirmationUrl)
                 .validationURL(validationUrl)
@@ -71,6 +70,7 @@ public class MpesaActions {
                 .responseType(responseType)
                 .build();
         HttpEntity<URLRegistrationRequestDTO> requestEntity = new HttpEntity<>(request, headers);
+        log.info("Auth Response {} Request{}", response, requestEntity);
         ResponseEntity<URLRegistrationResponseDTO> responseEntity = template.exchange(urlRegistrationUrl, HttpMethod.POST, requestEntity, URLRegistrationResponseDTO.class);
         responseEntity.getBody();
     }
