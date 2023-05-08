@@ -1,11 +1,12 @@
-package app.fortuneconnect.payments.DTO;
+package app.fortuneconnect.payments.DTO.Responses;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@Data @Builder
+@Data @Builder @NoArgsConstructor @AllArgsConstructor
 public class URLRegistrationResponseDTO{
 
 	@JsonProperty("ConversationID")

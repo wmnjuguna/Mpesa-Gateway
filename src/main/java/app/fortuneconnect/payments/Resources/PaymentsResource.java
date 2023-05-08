@@ -41,7 +41,7 @@ public class PaymentsResource {
         );
     }
 
-    @PostMapping("stk-callback")
+    @PostMapping("stk")
     public ResponseEntity<ResponseTemplate<?>> stkCallback(@RequestBody StkCallbackResponseBody callback){
         StkLog logMono = stkLogService.retriveByMerchantId(callback.getStkCallback().getMerchantRequestID());
         logMono.setResultCode(callback.getStkCallback().getResultCode());

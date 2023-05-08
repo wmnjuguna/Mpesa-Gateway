@@ -4,7 +4,7 @@ import app.fortuneconnect.payments.DTO.MpesaExpressRequestDTO;
 import app.fortuneconnect.payments.DTO.Responses.AuthorizationResponse;
 import app.fortuneconnect.payments.DTO.Responses.MpesaExpressResponseDTO;
 import app.fortuneconnect.payments.DTO.URLRegistrationRequestDTO;
-import app.fortuneconnect.payments.DTO.URLRegistrationResponseDTO;
+import app.fortuneconnect.payments.DTO.Responses.URLRegistrationResponseDTO;
 import app.fortuneconnect.payments.Exceptions.AuthenticationFailed;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
@@ -13,9 +13,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
-
-import java.nio.charset.StandardCharsets;
-import java.util.Base64;
 
 @Component
 @Slf4j
