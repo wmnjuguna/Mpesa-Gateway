@@ -26,7 +26,7 @@ public class PaybillConfigService {
 
     @Transactional
     public PaybillConfig createPaybillConfiguration(PaybillConfig paybillConfig){
-//        this.mpesaActions.registerURl(paybillConfig.getConsumerSecret(), paybillConfig.getConsumerKey(), paybillConfig.getConfirmationUrl(), paybillConfig.getValidationUrl(), paybillConfig.getPaybillNo(), "Complete");
+        this.mpesaActions.registerURl(paybillConfig.getConsumerSecret(), paybillConfig.getConsumerKey(), paybillConfig.getConfirmationUrl(), paybillConfig.getValidationUrl(), paybillConfig.getPaybillNo(), "Complete");
         paybillConfig.setPaybillUid(UUID.randomUUID().toString());
         paybillConfig.setConsumerKey(Base64.getEncoder().encodeToString(paybillConfig.getConsumerKey().getBytes(StandardCharsets.UTF_8)));
         paybillConfig.setConsumerSecret(Base64.getEncoder().encodeToString(paybillConfig.getConsumerSecret().getBytes(StandardCharsets.UTF_8)));
