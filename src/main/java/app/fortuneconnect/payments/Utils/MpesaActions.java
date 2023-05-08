@@ -48,7 +48,7 @@ public class MpesaActions {
         AuthorizationResponse response = authenticate(consumerSecret, consumerKey);
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.set("Authorization", "Bearer " + response.getAccessToken());
+        headers.setBearerAuth(response.getAccessToken());
         HttpEntity<MpesaExpressRequestDTO> requestEntity = new HttpEntity<>(request, headers);
         ResponseEntity<MpesaExpressResponseDTO> responseEntity = template.exchange(mpesaExpressUrl, HttpMethod.POST, requestEntity, MpesaExpressResponseDTO.class);
         if(!responseEntity.getStatusCode().is2xxSuccessful()){
@@ -62,7 +62,7 @@ public class MpesaActions {
         AuthorizationResponse response =  authenticate(consumerSecret, consumerKey);
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.set("Authorization", "Basic " + response.getAccessToken());
+        headers.setBearerAuth(response.getAccessToken());
         URLRegistrationRequestDTO request = URLRegistrationRequestDTO.builder()
                 .confirmationURL(confirmationUrl)
                 .validationURL(validationUrl)
