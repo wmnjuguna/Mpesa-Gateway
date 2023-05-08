@@ -34,12 +34,13 @@ public class MpesaActions {
 
 
     public AuthorizationResponse authenticate(String consumerSecret, String consumerKey) {
-        String appKeySecret = consumerKey+":"+consumerSecret;
-        String encoded = Base64.getEncoder().encodeToString(appKeySecret.getBytes(StandardCharsets.UTF_8));
         HttpHeaders headers = new HttpHeaders();
-        headers.set("Authorization", "Basic " + encoded);
+        headers.setBasicAuth(consumerKey, consumerSecret);
         HttpEntity<Void> requestEntity = new HttpEntity<>(headers);
         ResponseEntity<AuthorizationResponse> response = template.exchange(authenticationUrl, HttpMethod.GET, requestEntity, AuthorizationResponse.class);
+        if(!response.getStatusCode().is2xxSuccessful()){
+            throw new AuthenticationFailed();
+        }
         return response.getBody();
     }
 
