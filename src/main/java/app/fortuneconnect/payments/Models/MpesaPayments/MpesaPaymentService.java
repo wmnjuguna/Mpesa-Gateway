@@ -41,7 +41,7 @@ public class MpesaPaymentService implements MpesaPaymentOperations {
 
         String timeStamp = parseDate(new Date());
 
-        PaybillConfig config = this.paybillConfigService.retrievePaybillConfiguration(stkPayment.getPaybill().toString());
+        PaybillConfig config = this.paybillConfigService.retrievePaybillConfiguration(stkPayment.getPaybill().toString(), "no");
 
         String password = stkPayment.getPaybill()+new String(Base64.getDecoder().decode(config.getPassKey()))+timeStamp;
 

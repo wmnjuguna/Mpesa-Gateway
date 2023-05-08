@@ -33,20 +33,16 @@ public class MpesaActions {
     private String urlRegistrationUrl;
 
 
-public AuthorizationResponse authenticate(String consumerKey, String consumerSecret) {
-    log.info("URI {}", authenticationUrl);
-    String appKeySecret = consumerKey + ":" + consumerSecret;
-    byte[] bytes = appKeySecret.getBytes(StandardCharsets.ISO_8859_1);
-    HttpHeaders headers = new HttpHeaders();
-    headers.setBasicAuth(consumerKey, consumerSecret);
-    headers.set("Authorization", "Basic " + Base64.getEncoder().encodeToString(bytes));
-    HttpEntity<Void> requestEntity = new HttpEntity<>(headers);
-    ResponseEntity<AuthorizationResponse> response = template.exchange(authenticationUrl, HttpMethod.GET, requestEntity, AuthorizationResponse.class);
-    if (!response.getStatusCode().is2xxSuccessful()) {
-        throw new AuthenticationFailed();
+    public AuthorizationResponse authenticate(String consumerSecret, String consumerKey) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBasicAuth(consumerKey, consumerSecret);
+        HttpEntity<Void> requestEntity = new HttpEntity<>(headers);
+        ResponseEntity<AuthorizationResponse> response = template.exchange(authenticationUrl, HttpMethod.GET, requestEntity, AuthorizationResponse.class);
+        if(!response.getStatusCode().is2xxSuccessful()){
+            throw new AuthenticationFailed();
+        }
+        return response.getBody();
     }
-    return response.getBody();
-}
 
     public MpesaExpressResponseDTO lipaNaMpesaOnline(MpesaExpressRequestDTO request, String consumerSecret, String consumerKey){
         AuthorizationResponse response = authenticate(consumerSecret, consumerKey);
@@ -55,6 +51,9 @@ public AuthorizationResponse authenticate(String consumerKey, String consumerSec
         headers.set("Authorization", "Bearer " + response.getAccessToken());
         HttpEntity<MpesaExpressRequestDTO> requestEntity = new HttpEntity<>(request, headers);
         ResponseEntity<MpesaExpressResponseDTO> responseEntity = template.exchange(mpesaExpressUrl, HttpMethod.POST, requestEntity, MpesaExpressResponseDTO.class);
+        if(!responseEntity.getStatusCode().is2xxSuccessful()){
+            throw new AuthenticationFailed();
+        }
         return responseEntity.getBody();
     }
 
