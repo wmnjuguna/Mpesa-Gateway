@@ -4,6 +4,8 @@ import app.fortuneconnect.payments.DTO.ClaimSTKPayment;
 import app.fortuneconnect.payments.DTO.ResponseTemplate;
 import app.fortuneconnect.payments.DTO.Responses.StkCallbackResponseBody;
 import app.fortuneconnect.payments.Exceptions.ExpressPaymentUnsuccessful;
+import app.fortuneconnect.payments.Models.CallbackLogs.CallbackLog;
+import app.fortuneconnect.payments.Models.CallbackLogs.CallbackLogService;
 import app.fortuneconnect.payments.Models.Configuration.PaybillConfig;
 import app.fortuneconnect.payments.Models.Configuration.PaybillConfigService;
 import app.fortuneconnect.payments.Models.MpesaPayments.MpesaPaymentService;
@@ -23,14 +25,17 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 @RestController
 @RequestMapping("api/v1/hela")
 public class PaymentsResource {
-    @Autowired
-    private MpesaPaymentService mpesaPaymentService;
 
-    @Autowired
-    private StkLogService stkLogService;
+    private final MpesaPaymentService mpesaPaymentService;
+    private final PaybillConfigService paybillConfigService;
+    private final CallbackLogService callbackLogService;
 
-    @Autowired
-    private PaybillConfigService paybillConfigService;
+    public PaymentsResource(MpesaPaymentService mpesaPaymentService, PaybillConfigService paybillConfigService,
+                            CallbackLogService callbackLogService){
+        this.callbackLogService = callbackLogService;
+        this.paybillConfigService = paybillConfigService;
+        this.mpesaPaymentService = mpesaPaymentService;
+    }
 
     @PostMapping("request-payment")
     public ResponseEntity<ResponseTemplate<?>> stkPushPayment(@RequestBody ClaimSTKPayment payment){
@@ -43,21 +48,11 @@ public class PaymentsResource {
 
     @PostMapping("stk")
     public ResponseEntity<ResponseTemplate<?>> stkCallback(@RequestBody StkCallbackResponseBody callback){
-        StkLog logMono = stkLogService.retriveByMerchantId(callback.getStkCallback().getMerchantRequestID());
-        logMono.setResultCode(callback.getStkCallback().getResultCode());
-        if(callback.getStkCallback().getResultCode() == 0){
-            logMono.setMpesaReceiptNo(callback.getStkCallback().getCallbackMetadata()
-                    .getItem().stream().filter(
-                            itemItem -> itemItem.getName().equalsIgnoreCase("MpesaReceiptNumber"))
-                    .findFirst().get().getName());
-            stkLogService.updateLog(logMono);
-            return ResponseEntity.ok().body(
-                    ResponseTemplate.builder().message("Payment received with receipt no").build()
-        );
-        } else{
-            stkLogService.updateLog(logMono);
-            throw new ExpressPaymentUnsuccessful("Payment Could not be completed");
-        }
+        CallbackLog log = new CallbackLog(null, null, callback.getStkCallback().getMerchantRequestID(),
+                callback.getStkCallback().getCheckoutRequestID(), callback.getStkCallback().getResultDesc(),
+                callback.getStkCallback().getResultCode());
+        callbackLogService.createCallBackLog(log);
+        return ResponseEntity.ok().body(null);
     }
 
     @PostMapping("configure-paybill")
