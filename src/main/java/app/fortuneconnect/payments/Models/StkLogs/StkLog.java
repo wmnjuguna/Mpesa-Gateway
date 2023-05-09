@@ -1,9 +1,7 @@
 package app.fortuneconnect.payments.Models.StkLogs;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import app.fortuneconnect.payments.Models.MpesaPayments.MpesaPayment;
+import jakarta.persistence.*;
 import lombok.*;
 
 @Builder
@@ -22,4 +20,6 @@ public class StkLog {
     private Integer responseCode;
     private Integer resultCode;
     private String mpesaReceiptNo;
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    private MpesaPayment mpesaPayment;
 }

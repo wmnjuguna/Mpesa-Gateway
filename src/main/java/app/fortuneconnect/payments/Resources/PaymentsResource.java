@@ -3,16 +3,11 @@ package app.fortuneconnect.payments.Resources;
 import app.fortuneconnect.payments.DTO.ClaimSTKPayment;
 import app.fortuneconnect.payments.DTO.ResponseTemplate;
 import app.fortuneconnect.payments.DTO.Responses.StkCallbackResponseBody;
-import app.fortuneconnect.payments.Exceptions.ExpressPaymentUnsuccessful;
-import app.fortuneconnect.payments.Models.CallbackLogs.CallbackLog;
-import app.fortuneconnect.payments.Models.CallbackLogs.CallbackLogService;
 import app.fortuneconnect.payments.Models.Configuration.PaybillConfig;
 import app.fortuneconnect.payments.Models.Configuration.PaybillConfigService;
 import app.fortuneconnect.payments.Models.MpesaPayments.MpesaPaymentService;
-import app.fortuneconnect.payments.Models.StkLogs.StkLog;
 import app.fortuneconnect.payments.Models.StkLogs.StkLogService;
 import app.fortuneconnect.payments.Utils.PaginationUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -28,13 +23,13 @@ public class PaymentsResource {
 
     private final MpesaPaymentService mpesaPaymentService;
     private final PaybillConfigService paybillConfigService;
-    private final CallbackLogService callbackLogService;
+    private final StkLogService stkLogService;
 
     public PaymentsResource(MpesaPaymentService mpesaPaymentService, PaybillConfigService paybillConfigService,
-                            CallbackLogService callbackLogService){
-        this.callbackLogService = callbackLogService;
+                            StkLogService stkLogService){
         this.paybillConfigService = paybillConfigService;
         this.mpesaPaymentService = mpesaPaymentService;
+        this.stkLogService = stkLogService;
     }
 
     @PostMapping("request-payment")
@@ -48,10 +43,7 @@ public class PaymentsResource {
 
     @PostMapping("stk")
     public ResponseEntity<ResponseTemplate<?>> stkCallback(@RequestBody StkCallbackResponseBody callback){
-        CallbackLog log = new CallbackLog(null, null, callback.getStkCallback().getMerchantRequestID(),
-                callback.getStkCallback().getCheckoutRequestID(), callback.getStkCallback().getResultDesc(),
-                callback.getStkCallback().getResultCode());
-        callbackLogService.createCallBackLog(log);
+        stkLogService.updateLog(callback);
         return ResponseEntity.ok().body(null);
     }
 
