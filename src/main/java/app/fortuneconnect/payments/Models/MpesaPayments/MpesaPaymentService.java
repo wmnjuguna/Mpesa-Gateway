@@ -7,21 +7,24 @@ import app.fortuneconnect.payments.Models.Configuration.PaybillConfig;
 import app.fortuneconnect.payments.Models.Configuration.PaybillConfigService;
 import app.fortuneconnect.payments.Models.StkLogs.StkLog;
 import app.fortuneconnect.payments.Models.StkLogs.StkLogService;
+import app.fortuneconnect.payments.Utils.Const.MpesaStaticStrings;
 import app.fortuneconnect.payments.Utils.MpesaActions;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.Base64;
 import java.util.Date;
+import java.util.Objects;
 
 import static app.fortuneconnect.payments.Utils.Enums.TransactionTypeEnum.CustomerBuyGoodsOnline;
 
 @Service @Slf4j
 public class MpesaPaymentService implements MpesaPaymentOperations {
 
-    private final MpesaPaymentRepository repository;
+    private final MpesaPaymentRepository mpesaPaymentRepository;
 
     private final StkLogService stkLogService;
 
@@ -29,13 +32,15 @@ public class MpesaPaymentService implements MpesaPaymentOperations {
 
     private final PaybillConfigService paybillConfigService;
 
-    public MpesaPaymentService(MpesaPaymentRepository repository, StkLogService stkLogService, MpesaActions actions, PaybillConfigService paybillConfigService) {
-        this.repository = repository;
+    public MpesaPaymentService(MpesaPaymentRepository mpesaPaymentRepository, StkLogService stkLogService,
+                               MpesaActions actions, PaybillConfigService paybillConfigService) {
+        this.mpesaPaymentRepository = mpesaPaymentRepository;
         this.stkLogService = stkLogService;
         this.actions = actions;
         this.paybillConfigService = paybillConfigService;
     }
 
+    @Transactional
     @Override
     public StkLog requestPayment(ClaimSTKPayment stkPayment){
 
@@ -45,8 +50,13 @@ public class MpesaPaymentService implements MpesaPaymentOperations {
 
         String password = stkPayment.getPaybill()+new String(Base64.getDecoder().decode(config.getPassKey()))+timeStamp;
 
+        MpesaPayment payment = new MpesaPayment(null, null, null,
+                stkPayment.getPhoneNo(), stkPayment.getAmount(), new Date(),
+                stkPayment.getPaybill().toString(), null, MpesaStaticStrings.MPESA_STK_COLLECTION ,
+                false, stkPayment.getPaymentReference(),MpesaStaticStrings.CREDIT,null);
+
         MpesaExpressResponseDTO responseDTO = actions.lipaNaMpesaOnline(MpesaExpressRequestDTO.builder()
-                .accountReference(stkPayment.getPhoneNo())
+                .accountReference((!Objects.isNull(stkPayment.getPaymentReference())) ? stkPayment.getPaymentReference() : stkPayment.getPhoneNo())
                 .amount(stkPayment.getAmount())
                 .businessShortCode(stkPayment.getPaybill())
                 .partyA(stkPayment.getPhoneNo())
@@ -67,6 +77,7 @@ public class MpesaPaymentService implements MpesaPaymentOperations {
                 .merchantRequestID(responseDTO.getMerchantRequestID())
                 .responseCode(responseDTO.getResponseCode())
                 .responseDescription(responseDTO.getResponseDescription())
+                .mpesaPayment(payment)
                 .build()
         );
 

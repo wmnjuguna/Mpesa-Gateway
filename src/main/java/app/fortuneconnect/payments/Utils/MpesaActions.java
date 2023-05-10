@@ -6,6 +6,7 @@ import app.fortuneconnect.payments.DTO.Responses.MpesaExpressResponseDTO;
 import app.fortuneconnect.payments.DTO.URLRegistrationRequestDTO;
 import app.fortuneconnect.payments.DTO.Responses.URLRegistrationResponseDTO;
 import app.fortuneconnect.payments.Exceptions.AuthenticationFailed;
+import app.fortuneconnect.payments.Exceptions.StkPushFailed;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,7 +50,7 @@ public class MpesaActions {
         HttpEntity<MpesaExpressRequestDTO> requestEntity = new HttpEntity<>(request, headers);
         ResponseEntity<MpesaExpressResponseDTO> responseEntity = template.exchange(mpesaExpressUrl, HttpMethod.POST, requestEntity, MpesaExpressResponseDTO.class);
         if(!responseEntity.getStatusCode().is2xxSuccessful()){
-            throw new AuthenticationFailed();
+            throw new StkPushFailed();
         }
         return responseEntity.getBody();
     }

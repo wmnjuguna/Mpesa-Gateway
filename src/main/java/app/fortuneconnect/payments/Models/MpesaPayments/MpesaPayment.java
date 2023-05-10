@@ -1,5 +1,6 @@
 package app.fortuneconnect.payments.Models.MpesaPayments;
 
+import app.fortuneconnect.payments.Models.StkLogs.StkLog;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -13,8 +14,9 @@ public class MpesaPayment {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long sn;
     @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(nullable = false)
     private String  mpesaPaymentUid;
-    @Column(length = 50, nullable = false)
+    @Column(length = 50)
     private String customerName;
     @Column(length = 15, nullable = false)
     private String phoneNumber;
@@ -33,5 +35,7 @@ public class MpesaPayment {
     private String accountNo;
     @Column(length = 2)
     private String transactionOperation; // Whether Debit or Credit
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    private StkLog stkLog;
 
 }
