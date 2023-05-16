@@ -15,20 +15,20 @@ public class ClaimSTKPayment {
 
     @JsonProperty("amount")
     @NotBlank(message =  "Value cannot be blank")
-    @NotEmpty(message =  "Value cannot be emoty")
+    @NotEmpty(message =  "Value cannot be empty")
     @NotNull(message =  "Value cannot be null")
     private Double amount;
 
     @JsonProperty(value = "paybill", required = true)
     @NotBlank(message =  "Value cannot be blank")
-    @NotEmpty(message =  "Value cannot be emoty")
+    @NotEmpty(message =  "Value cannot be empty")
     @NotNull(message =  "Value cannot be null")
     @Min(value = 5, message = "Value does not conform to allowed length")
     @Max(value = 6, message = "Value does not conform to allowed length")
     private Integer paybill;
 
-    @JsonProperty(value = "paybill")
+    @JsonProperty(value = "paymentReference")
     @NotBlank(message =  "Value cannot be blank")
-    @NotEmpty(message =  "Value cannot be emoty")
+    @NotEmpty(message =  "Value cannot be empty")
     private String paymentReference;
 }
