@@ -26,4 +26,12 @@ public class ClaimSTKPayment {
     @Min(value = 5, message = "Value does not conform to allowed length")
     @Max(value = 6, message = "Value does not conform to allowed length")
     private Integer paybill;
+
+    @JsonProperty(value = "paymentReference", required = true)
+    @NotBlank(message =  "Value cannot be blank")
+    @NotEmpty(message =  "Value cannot be emoty")
+    @NotNull(message =  "Value cannot be null")
+    @Min(value = 5, message = "Value does not conform to allowed length")
+    @Max(value = 6, message = "Value does not conform to allowed length")
+    private String paymentReference;
 }
