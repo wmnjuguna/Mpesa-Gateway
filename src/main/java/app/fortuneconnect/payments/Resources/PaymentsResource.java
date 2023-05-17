@@ -8,6 +8,8 @@ import app.fortuneconnect.payments.Models.Configuration.PaybillConfigService;
 import app.fortuneconnect.payments.Models.MpesaPayments.MpesaPaymentService;
 import app.fortuneconnect.payments.Models.StkLogs.StkLogService;
 import app.fortuneconnect.payments.Utils.PaginationUtils;
+import jakarta.servlet.http.HttpServletRequest;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -16,8 +18,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import java.io.IOException;
+
 @CrossOrigin
-@RestController
+@RestController @Slf4j
 @RequestMapping("api/v1/hela")
 public class PaymentsResource {
 
@@ -42,8 +46,10 @@ public class PaymentsResource {
     }
 
     @PostMapping("stk")
-    public ResponseEntity<ResponseTemplate<?>> stkCallback(@RequestBody StkCallbackResponseBody callback){
+    public ResponseEntity<ResponseTemplate<?>> stkCallback(@RequestBody StkCallbackResponseBody callback, HttpServletRequest request) throws IOException {
+        log.info("Incoming {}", callback);
         stkLogService.updateLog(callback);
+        log.info("More {}", request.getReader().readLine());
         return ResponseEntity.ok().body(null);
     }
 
