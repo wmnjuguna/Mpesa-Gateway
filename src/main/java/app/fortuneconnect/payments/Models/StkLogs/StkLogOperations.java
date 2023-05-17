@@ -2,6 +2,7 @@ package app.fortuneconnect.payments.Models.StkLogs;
 
 
 import app.fortuneconnect.payments.DTO.Responses.StkCallbackResponseBody;
+import app.fortuneconnect.payments.DTO.Responses.StkCallbackResponseDTO;
 import org.springframework.transaction.annotation.Transactional;
 
 public interface StkLogOperations {
@@ -10,7 +11,7 @@ public interface StkLogOperations {
     StkLog retriveLog(String uid);
 
     @Transactional
-    StkLog updateLog(StkCallbackResponseBody callback);
+    StkLog updateLog(StkCallbackResponseDTO callback);
 
     StkLog retriveByMerchantId(String merchantRequestId);
 }
