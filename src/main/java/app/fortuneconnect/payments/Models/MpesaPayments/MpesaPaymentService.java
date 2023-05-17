@@ -64,7 +64,7 @@ public class MpesaPaymentService implements MpesaPaymentOperations {
                 .callBackURL(new String(Base64.getDecoder().decode(config.getStkCallbackUrl())))
                 .phoneNumber(stkPayment.getPhoneNo())
                 .timestamp(timeStamp)
-                .transactionDesc(stkPayment.getpaybill+ " /REF " +stkPayment.getPhoneNo())
+                .transactionDesc(stkPayment.getPaybill()+ " /REF " +stkPayment.getPhoneNo())
                 .transactionType(CustomerPaybillOnline.getTransactioType())
                 .password(
                         Base64.getEncoder().encodeToString(password.getBytes(StandardCharsets.ISO_8859_1)))
