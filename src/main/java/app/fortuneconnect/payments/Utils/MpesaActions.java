@@ -4,8 +4,9 @@ import app.fortuneconnect.payments.DTO.MpesaExpressRequestDTO;
 import app.fortuneconnect.payments.DTO.Responses.AuthorizationResponse;
 import app.fortuneconnect.payments.DTO.Responses.MpesaExpressResponseDTO;
 import app.fortuneconnect.payments.DTO.URLRegistrationRequestDTO;
-import app.fortuneconnect.payments.DTO.URLRegistrationResponseDTO;
+import app.fortuneconnect.payments.DTO.Responses.URLRegistrationResponseDTO;
 import app.fortuneconnect.payments.Exceptions.AuthenticationFailed;
+import app.fortuneconnect.payments.Exceptions.StkPushFailed;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,9 +14,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
-
-import java.nio.charset.StandardCharsets;
-import java.util.Base64;
 
 @Component
 @Slf4j
@@ -33,28 +31,27 @@ public class MpesaActions {
     private String urlRegistrationUrl;
 
 
-public AuthorizationResponse authenticate(String consumerKey, String consumerSecret) {
-    log.info("URI {}", authenticationUrl);
-    String appKeySecret = consumerKey + ":" + consumerSecret;
-    byte[] bytes = appKeySecret.getBytes(StandardCharsets.ISO_8859_1);
-    HttpHeaders headers = new HttpHeaders();
-    headers.setBasicAuth(consumerKey, consumerSecret);
-    headers.set("Authorization", "Basic " + Base64.getEncoder().encodeToString(bytes));
-    HttpEntity<Void> requestEntity = new HttpEntity<>(headers);
-    ResponseEntity<AuthorizationResponse> response = template.exchange(authenticationUrl, HttpMethod.GET, requestEntity, AuthorizationResponse.class);
-    if (!response.getStatusCode().is2xxSuccessful()) {
-        throw new AuthenticationFailed();
+    public AuthorizationResponse authenticate(String consumerSecret, String consumerKey) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBasicAuth(consumerKey, consumerSecret);
+        HttpEntity<Void> requestEntity = new HttpEntity<>(headers);
+        ResponseEntity<AuthorizationResponse> response = template.exchange(authenticationUrl, HttpMethod.GET, requestEntity, AuthorizationResponse.class);
+        if(!response.getStatusCode().is2xxSuccessful()){
+            throw new AuthenticationFailed();
+        }
+        return response.getBody();
     }
-    return response.getBody();
-}
 
     public MpesaExpressResponseDTO lipaNaMpesaOnline(MpesaExpressRequestDTO request, String consumerSecret, String consumerKey){
         AuthorizationResponse response = authenticate(consumerSecret, consumerKey);
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.set("Authorization", "Bearer " + response.getAccessToken());
+        headers.setBearerAuth(response.getAccessToken());
         HttpEntity<MpesaExpressRequestDTO> requestEntity = new HttpEntity<>(request, headers);
         ResponseEntity<MpesaExpressResponseDTO> responseEntity = template.exchange(mpesaExpressUrl, HttpMethod.POST, requestEntity, MpesaExpressResponseDTO.class);
+        if(!responseEntity.getStatusCode().is2xxSuccessful()){
+            throw new StkPushFailed();
+        }
         return responseEntity.getBody();
     }
 
@@ -63,7 +60,7 @@ public AuthorizationResponse authenticate(String consumerKey, String consumerSec
         AuthorizationResponse response =  authenticate(consumerSecret, consumerKey);
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.set("Authorization", "Bearer " + response.getAccessToken());
+        headers.setBearerAuth(response.getAccessToken());
         URLRegistrationRequestDTO request = URLRegistrationRequestDTO.builder()
                 .confirmationURL(confirmationUrl)
                 .validationURL(validationUrl)

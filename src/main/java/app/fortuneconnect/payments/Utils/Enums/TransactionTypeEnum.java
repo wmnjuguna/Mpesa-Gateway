@@ -1,7 +1,7 @@
 package app.fortuneconnect.payments.Utils.Enums;
 
 public enum TransactionTypeEnum {
-    CustomerPaybillOnline("CustomerPaybillOnline"),
+    CustomerPaybillOnline("CustomerPayBillOnline"),
     CustomerBuyGoodsOnline("CustomerBuyGoodsOnline");
 
     private final String transactioType;

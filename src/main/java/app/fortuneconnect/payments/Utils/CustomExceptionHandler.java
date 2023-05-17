@@ -13,6 +13,8 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.reactive.result.method.annotation.ResponseEntityExceptionHandler;
 
+import java.text.ParseException;
+
 @Order(Ordered.HIGHEST_PRECEDENCE)
 @ControllerAdvice
 public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
@@ -42,6 +44,13 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(value = { NullPointerException.class })
     public ResponseEntity<ResponseTemplate<?>> handleCustomException(NullPointerException ex) {
+        return  ResponseEntity.status(HttpStatus.UNAUTHORIZED.value()).body(ResponseTemplate.builder()
+                .error(ex.getMessage())
+                .build()
+        );
+    }
+    @ExceptionHandler(value = { ParseException.class })
+    public ResponseEntity<ResponseTemplate<?>> handleCustomException(ParseException ex) {
         return  ResponseEntity.status(HttpStatus.UNAUTHORIZED.value()).body(ResponseTemplate.builder()
                 .error(ex.getMessage())
                 .build()

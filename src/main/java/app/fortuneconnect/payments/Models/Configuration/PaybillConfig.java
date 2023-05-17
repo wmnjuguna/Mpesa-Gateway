@@ -25,7 +25,7 @@ public class PaybillConfig {
     private String paybillUid;
     @Column(length = 10, unique = true, nullable = false)
     private Integer paybillNo;
-    @Column(length = 20, nullable = false)
+    @Column(length = 100, nullable = false)
     private String organisationName;
     @Column(nullable = false)
     @JsonProperty(access=JsonProperty.Access.WRITE_ONLY)
