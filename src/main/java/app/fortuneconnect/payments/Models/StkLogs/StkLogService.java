@@ -40,7 +40,7 @@ public class StkLogService implements StkLogOperations{
                             case MpesaStaticStrings.AMOUNT -> log.getMpesaPayment().setTransactionAmount((Double) item.getValue());
                             case MpesaStaticStrings.TRANSACTION_DATE -> {
                                 try {
-                                    log.getMpesaPayment().setTransactionTime(StringToDateConverter.parse((String) item.getValue()));
+                                    log.getMpesaPayment().setTransactionTime(StringToDateConverter.parse(item.getValue().toString()));
                                 } catch (ParseException e) {
                                     throw new RuntimeException(e);
                                 }
