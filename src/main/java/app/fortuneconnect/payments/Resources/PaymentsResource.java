@@ -48,8 +48,8 @@ public class PaymentsResource {
     @PostMapping("stk")
     public ResponseEntity<ResponseTemplate<?>> stkCallback(@RequestBody StkCallbackResponseBody callback, HttpServletRequest request) throws IOException {
         log.info("Incoming {}", callback);
-        stkLogService.updateLog(callback);
         log.info("More {}", request.getReader().readLine());
+        stkLogService.updateLog(callback);
         return ResponseEntity.ok().body(null);
     }
 
