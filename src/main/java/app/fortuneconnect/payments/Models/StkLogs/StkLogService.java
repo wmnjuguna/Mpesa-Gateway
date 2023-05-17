@@ -36,7 +36,7 @@ public class StkLogService implements StkLogOperations{
             callback.getBody().getStkCallback().getCallbackMetadata().getItem().forEach(
                     item -> {
                         switch (item.getName()){
-                            case MpesaStaticStrings.MPESA_RECEIPT_NO -> log.getMpesaPayment().setMpesaTransactionNo((String) item.getValue());
+                            case MpesaStaticStrings.MPESA_RECEIPT_NO -> log.getMpesaPayment().setMpesaTransactionNo(item.getValue().toString());
                             case MpesaStaticStrings.AMOUNT -> log.getMpesaPayment().setTransactionAmount((Double) item.getValue());
                             case MpesaStaticStrings.TRANSACTION_DATE -> {
                                 try {
@@ -46,7 +46,7 @@ public class StkLogService implements StkLogOperations{
                                 }
                             }
                             case MpesaStaticStrings.BALANCE -> {}
-                            default -> log.getMpesaPayment().setPhoneNumber((String) item.getValue());
+                            default -> log.getMpesaPayment().setPhoneNumber(item.getValue().toString());
                         }
                     }
             );
