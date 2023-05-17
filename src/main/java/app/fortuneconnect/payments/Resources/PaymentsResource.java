@@ -46,7 +46,6 @@ public class PaymentsResource {
 
     @PostMapping("stk")
     public ResponseEntity<ResponseTemplate<?>> stkCallback(@RequestBody StkCallbackResponseDTO callback, HttpServletRequest request){
-        log.info("Incoming {}", callback);
         stkLogService.updateLog(callback);
         return ResponseEntity.ok().body(null);
     }

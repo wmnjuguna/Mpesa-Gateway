@@ -18,6 +18,7 @@ import java.text.SimpleDateFormat;
 import java.util.Base64;
 import java.util.Date;
 import java.util.Objects;
+import java.util.UUID;
 
 import static app.fortuneconnect.payments.Utils.Enums.TransactionTypeEnum.CustomerPaybillOnline;
 
@@ -50,7 +51,7 @@ public class MpesaPaymentService implements MpesaPaymentOperations {
 
         String password = stkPayment.getPaybill()+new String(Base64.getDecoder().decode(config.getPassKey()))+timeStamp;
 
-        MpesaPayment payment = new MpesaPayment(null, null, null,
+        MpesaPayment payment = new MpesaPayment(null, UUID.randomUUID().toString(), null,
                 stkPayment.getPhoneNo(), stkPayment.getAmount(), new Date(),
                 stkPayment.getPaybill().toString(), null, MpesaStaticStrings.MPESA_STK_COLLECTION ,
                 false, stkPayment.getPaymentReference(),MpesaStaticStrings.CREDIT,null);
