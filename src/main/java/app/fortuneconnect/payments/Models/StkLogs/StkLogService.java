@@ -44,6 +44,7 @@ public class StkLogService implements StkLogOperations{
                                     throw new RuntimeException(e);
                                 }
                             }
+                            case MpesaStaticStrings.BALANCE -> {}
                             default -> log.getMpesaPayment().setPhoneNumber((String) item.getValue());
                         }
                     }
