@@ -19,7 +19,7 @@ import java.util.Base64;
 import java.util.Date;
 import java.util.Objects;
 
-import static app.fortuneconnect.payments.Utils.Enums.TransactionTypeEnum.CustomerBuyGoodsOnline;
+import static app.fortuneconnect.payments.Utils.Enums.TransactionTypeEnum.CustomerPaybillOnline;
 
 @Service @Slf4j
 public class MpesaPaymentService implements MpesaPaymentOperations {
@@ -64,8 +64,8 @@ public class MpesaPaymentService implements MpesaPaymentOperations {
                 .callBackURL(new String(Base64.getDecoder().decode(config.getStkCallbackUrl())))
                 .phoneNumber(stkPayment.getPhoneNo())
                 .timestamp(timeStamp)
-                .transactionDesc("STK from "+stkPayment.getPhoneNo())
-                .transactionType(CustomerBuyGoodsOnline.getTransactioType())
+                .transactionDesc(stkPayment.getpaybill+ " /REF " +stkPayment.getPhoneNo())
+                .transactionType(CustomerPaybillOnline.getTransactioType())
                 .password(
                         Base64.getEncoder().encodeToString(password.getBytes(StandardCharsets.ISO_8859_1)))
                 .build(), new String(Base64.getDecoder().decode(config.getConsumerSecret())),
