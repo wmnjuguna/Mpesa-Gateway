@@ -5,10 +5,12 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@Data @NoArgsConstructor @AllArgsConstructor
+@AllArgsConstructor @NoArgsConstructor @Data
 public class ItemItem{
+
 	@JsonProperty("Value")
 	private Object value;
+
 	@JsonProperty("Name")
 	private String name;
 }

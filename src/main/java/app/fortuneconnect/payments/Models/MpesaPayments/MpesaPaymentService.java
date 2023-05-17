@@ -55,8 +55,6 @@ public class MpesaPaymentService implements MpesaPaymentOperations {
                 stkPayment.getPaybill().toString(), null, MpesaStaticStrings.MPESA_STK_COLLECTION ,
                 false, stkPayment.getPaymentReference(),MpesaStaticStrings.CREDIT,null);
 
-        log.info("URL {}",new String(Base64.getDecoder().decode(config.getStkCallbackUrl())) );
-
         MpesaExpressResponseDTO responseDTO = actions.lipaNaMpesaOnline(MpesaExpressRequestDTO.builder()
                 .accountReference((!Objects.isNull(stkPayment.getPaymentReference())) ? stkPayment.getPaymentReference() : stkPayment.getPhoneNo())
                 .amount(stkPayment.getAmount())

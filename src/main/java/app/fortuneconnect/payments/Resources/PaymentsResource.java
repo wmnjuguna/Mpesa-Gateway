@@ -18,8 +18,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import java.io.IOException;
-
 @CrossOrigin
 @RestController @Slf4j
 @RequestMapping("api/v1/hela")
@@ -46,8 +44,9 @@ public class PaymentsResource {
     }
 
     @PostMapping("stk")
-    public ResponseEntity<ResponseTemplate<?>> stkCallback( HttpServletRequest request) throws IOException {
-        log.info("More {}", request.getReader().readLine());
+    public ResponseEntity<ResponseTemplate<?>> stkCallback(@RequestBody StkCallbackResponseBody callback, HttpServletRequest request){
+        log.info("Incoming {}", callback);
+        stkLogService.updateLog(callback);
         return ResponseEntity.ok().body(null);
     }
 
