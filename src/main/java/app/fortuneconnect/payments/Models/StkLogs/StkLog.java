@@ -20,6 +20,7 @@ public class StkLog {
     private Integer responseCode;
     private Integer resultCode;
     private String mpesaReceiptNo;
+    private String callbackUrl;
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private MpesaPayment mpesaPayment;
 }

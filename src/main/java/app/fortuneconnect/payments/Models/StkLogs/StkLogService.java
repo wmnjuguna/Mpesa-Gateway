@@ -3,6 +3,7 @@ package app.fortuneconnect.payments.Models.StkLogs;
 import app.fortuneconnect.payments.DTO.Responses.StkCallbackResponseBody;
 import app.fortuneconnect.payments.DTO.Responses.StkCallbackResponseDTO;
 import app.fortuneconnect.payments.Utils.Const.MpesaStaticStrings;
+import app.fortuneconnect.payments.Utils.MpesaActions;
 import app.fortuneconnect.payments.Utils.StringToDateConverter;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -13,9 +14,11 @@ import java.text.ParseException;
 public class StkLogService implements StkLogOperations{
 
     private  final StkLogRepository stkLogRepository;
+    private final MpesaActions actions;
 
-    public StkLogService(StkLogRepository stkLogRepository){
+    public StkLogService(StkLogRepository stkLogRepository, MpesaActions mpesaActions){
         this.stkLogRepository = stkLogRepository;
+        this.actions = mpesaActions;
     }
 
     @Override
@@ -52,6 +55,7 @@ public class StkLogService implements StkLogOperations{
             );
             log.getMpesaPayment().setTransactionStatus(true);
         }
+        actions.callBackWithConfirmationOrFailure(log.getMpesaPayment().getAccountNo(),log.getMpesaPayment().getTransactionAmount(), log.getMpesaPayment().getMpesaTransactionNo(), log.getCallbackUrl());
         return stkLogRepository.save(log);
     }
 
