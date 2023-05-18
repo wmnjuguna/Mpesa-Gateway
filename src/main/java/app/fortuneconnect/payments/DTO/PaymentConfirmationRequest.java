@@ -11,7 +11,7 @@ public class PaymentConfirmationRequest {
 	@JsonProperty("bill_reference")
 	private String billReference;
 
-	@JsonProperty("reference")
+	@JsonProperty("receipt_no")
 	private String reference;
 
 	@JsonProperty("amount_received")
