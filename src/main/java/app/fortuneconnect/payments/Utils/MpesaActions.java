@@ -86,7 +86,7 @@ public class MpesaActions {
         if(resultCode == 0){
             ResponseTemplate<PaymentConfirmationRequest> request = ResponseTemplate.<PaymentConfirmationRequest>builder()
                     .data(PaymentConfirmationRequest.builder()
-                            .orderNo(paymentReference)
+                            .billReference(paymentReference)
                             .paymentMethod("MPESA")
                             .amountReceived(amount)
                             .reference(receiptNo)
