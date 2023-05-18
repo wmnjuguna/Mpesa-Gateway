@@ -12,7 +12,7 @@ public class PaymentConfirmationRequest {
 	private String billReference;
 
 	@JsonProperty("receipt_no")
-	private String reference;
+	private String receiptNo;
 
 	@JsonProperty("amount_received")
 	private double amountReceived;

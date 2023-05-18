@@ -89,7 +89,7 @@ public class MpesaActions {
                             .billReference(paymentReference)
                             .paymentMethod("MPESA")
                             .amountReceived(amount)
-                            .reference(receiptNo)
+                            .receiptNo(receiptNo)
                             .build())
                     .message(MpesaStaticStrings.PAYMENT_SUCCESSFUL)
                     .build();
