@@ -8,8 +8,8 @@ import lombok.NoArgsConstructor;
 
 @Data @AllArgsConstructor @NoArgsConstructor @Builder
 public class PaymentConfirmationRequest {
-	@JsonProperty("order_no")
-	private String orderNo;
+	@JsonProperty("bill_reference")
+	private String billReference;
 
 	@JsonProperty("reference")
 	private String reference;
