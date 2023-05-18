@@ -84,14 +84,13 @@ public class MpesaActions {
         headers.setAccept(List.of(MediaType.APPLICATION_JSON));
         if(Objects.isNull(callbackUrl)) return;
         if(resultCode == 0){
-            PaymentConfirmationRequest paymentConfirmationRequest = PaymentConfirmationRequest.builder()
-                    .orderNo(paymentReference)
-                    .paymentMethod("MPESA")
-                    .amountReceived(amount)
-                    .reference(receiptNo)
-                    .build();
-            ResponseTemplate<PaymentConfirmationRequest> request = ResponseTemplate.builder()
-                    .data(paymentConfirmationRequest)
+            ResponseTemplate<PaymentConfirmationRequest> request = ResponseTemplate.<PaymentConfirmationRequest>builder()
+                    .data(PaymentConfirmationRequest.builder()
+                            .orderNo(paymentReference)
+                            .paymentMethod("MPESA")
+                            .amountReceived(amount)
+                            .reference(receiptNo)
+                            .build())
                     .message(MpesaStaticStrings.PAYMENT_SUCCESSFUL)
                     .build();
 
