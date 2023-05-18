@@ -1,5 +1,6 @@
 package app.fortuneconnect.payments.Utils;
 
+import app.fortuneconnect.payments.DTO.FortuneConnectRetailPaymentConfirmationRequest;
 import app.fortuneconnect.payments.DTO.MpesaExpressRequestDTO;
 import app.fortuneconnect.payments.DTO.Responses.AuthorizationResponse;
 import app.fortuneconnect.payments.DTO.Responses.MpesaExpressResponseDTO;
@@ -14,6 +15,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
+
+import java.util.List;
 
 @Component
 @Slf4j
@@ -70,6 +73,19 @@ public class MpesaActions {
         HttpEntity<URLRegistrationRequestDTO> requestEntity = new HttpEntity<>(request, headers);
         ResponseEntity<URLRegistrationResponseDTO> responseEntity = template.exchange(urlRegistrationUrl, HttpMethod.POST, requestEntity, URLRegistrationResponseDTO.class);
         responseEntity.getBody();
+    }
+
+    public void callBackWithConfirmationOrFailure( @NonNull String paymentReference, double amount, @NonNull String receiptNo, @NonNull String callbackUrl){
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.setAccept(List.of(MediaType.APPLICATION_JSON));
+        HttpEntity<FortuneConnectRetailPaymentConfirmationRequest> requestHttpEntity = new HttpEntity<>(FortuneConnectRetailPaymentConfirmationRequest.builder()
+                .orderNo(paymentReference)
+                .paymentMethod("MPESA")
+                .amountReceived(amount)
+                .reference(receiptNo)
+                .build(), headers);
+        template.exchange(callbackUrl, HttpMethod.POST, requestHttpEntity, Void.class);
     }
 
     public void bulkDisbursement(){

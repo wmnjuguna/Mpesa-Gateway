@@ -79,6 +79,7 @@ public class MpesaPaymentService implements MpesaPaymentOperations {
                 .responseCode(responseDTO.getResponseCode())
                 .responseDescription(responseDTO.getResponseDescription())
                 .mpesaPayment(payment)
+                .callbackUrl(stkPayment.getCallbackUrl())
                 .build()
         );
 
