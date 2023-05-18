@@ -2,6 +2,7 @@ package app.fortuneconnect.payments.Models.MpesaPayments;
 
 import app.fortuneconnect.payments.DTO.ClaimSTKPayment;
 import app.fortuneconnect.payments.DTO.MpesaExpressRequestDTO;
+import app.fortuneconnect.payments.DTO.Responses.MpesaConfirmationOrValidationResponse;
 import app.fortuneconnect.payments.DTO.Responses.MpesaExpressResponseDTO;
 import app.fortuneconnect.payments.Models.Configuration.PaybillConfig;
 import app.fortuneconnect.payments.Models.Configuration.PaybillConfigService;
@@ -85,8 +86,21 @@ public class MpesaPaymentService implements MpesaPaymentOperations {
 
     }
 
+    @Override
+    public void recordConfirmationPayment(MpesaConfirmationOrValidationResponse confirmationOrValidationResponse) {
+        MpesaPayment payment = new MpesaPayment(null, UUID.randomUUID().toString(), null,
+                confirmationOrValidationResponse.getMSISDN(), confirmationOrValidationResponse.getTransAmount(),  new Date(),
+                confirmationOrValidationResponse.getBusinessShortCode(),  null, MpesaStaticStrings.MPESA_COLLECTION ,
+                false, confirmationOrValidationResponse.getBillRefNumber(), MpesaStaticStrings.CREDIT,null);
+        actions.callBackWithConfirmationOrFailure(confirmationOrValidationResponse.getBillRefNumber(), confirmationOrValidationResponse.getTransAmount(),
+                confirmationOrValidationResponse.getTransID(),null, 0);
+        mpesaPaymentRepository.save(payment);
+    }
+
     private String parseDate(Date date){
         SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss");
         return formatter.format(date);
     }
+
+
 }

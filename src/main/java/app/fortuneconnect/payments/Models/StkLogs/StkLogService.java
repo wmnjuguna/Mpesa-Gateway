@@ -1,6 +1,5 @@
 package app.fortuneconnect.payments.Models.StkLogs;
 
-import app.fortuneconnect.payments.DTO.Responses.StkCallbackResponseBody;
 import app.fortuneconnect.payments.DTO.Responses.StkCallbackResponseDTO;
 import app.fortuneconnect.payments.Utils.Const.MpesaStaticStrings;
 import app.fortuneconnect.payments.Utils.MpesaActions;

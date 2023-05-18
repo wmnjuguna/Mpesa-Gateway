@@ -7,7 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data @AllArgsConstructor @NoArgsConstructor @Builder
-public class FortuneConnectRetailPaymentConfirmationRequest{
+public class PaymentConfirmationRequest {
 	@JsonProperty("order_no")
 	private String orderNo;
 

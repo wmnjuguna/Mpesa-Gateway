@@ -2,14 +2,13 @@ package app.fortuneconnect.payments.Resources;
 
 import app.fortuneconnect.payments.DTO.ClaimSTKPayment;
 import app.fortuneconnect.payments.DTO.ResponseTemplate;
-import app.fortuneconnect.payments.DTO.Responses.StkCallbackResponseBody;
+import app.fortuneconnect.payments.DTO.Responses.MpesaConfirmationOrValidationResponse;
 import app.fortuneconnect.payments.DTO.Responses.StkCallbackResponseDTO;
 import app.fortuneconnect.payments.Models.Configuration.PaybillConfig;
 import app.fortuneconnect.payments.Models.Configuration.PaybillConfigService;
 import app.fortuneconnect.payments.Models.MpesaPayments.MpesaPaymentService;
 import app.fortuneconnect.payments.Models.StkLogs.StkLogService;
 import app.fortuneconnect.payments.Utils.PaginationUtils;
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -20,7 +19,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 @CrossOrigin
-@RestController @Slf4j
+@RestController
+@Slf4j
 @RequestMapping("api/v1/hela")
 public class PaymentsResource {
 
@@ -29,14 +29,14 @@ public class PaymentsResource {
     private final StkLogService stkLogService;
 
     public PaymentsResource(MpesaPaymentService mpesaPaymentService, PaybillConfigService paybillConfigService,
-                            StkLogService stkLogService){
+                            StkLogService stkLogService) {
         this.paybillConfigService = paybillConfigService;
         this.mpesaPaymentService = mpesaPaymentService;
         this.stkLogService = stkLogService;
     }
 
     @PostMapping("request-payment")
-    public ResponseEntity<ResponseTemplate<?>> stkPushPayment(@RequestBody ClaimSTKPayment payment){
+    public ResponseEntity<ResponseTemplate<?>> stkPushPayment(@RequestBody ClaimSTKPayment payment) {
         return ResponseEntity.ok().body(
                 ResponseTemplate.builder()
                         .data(mpesaPaymentService.requestPayment(payment))
@@ -45,13 +45,19 @@ public class PaymentsResource {
     }
 
     @PostMapping("stk")
-    public ResponseEntity<ResponseTemplate<?>> stkCallback(@RequestBody StkCallbackResponseDTO callback, HttpServletRequest request){
+    public ResponseEntity<ResponseTemplate<?>> stkCallback(@RequestBody StkCallbackResponseDTO callback) {
         stkLogService.updateLog(callback);
         return ResponseEntity.ok().body(null);
     }
 
+    @PostMapping("confirm")
+    public ResponseEntity<ResponseTemplate<?>> confirm(MpesaConfirmationOrValidationResponse confirmationOrValidationResponse) {
+        mpesaPaymentService.recordConfirmationPayment(confirmationOrValidationResponse);
+        return ResponseEntity.ok().body(null);
+    }
+
     @PostMapping("configure-paybill")
-    public ResponseEntity<ResponseTemplate<?>> configurePaybill(@RequestBody PaybillConfig paybillConfig){
+    public ResponseEntity<ResponseTemplate<?>> configurePaybill(@RequestBody PaybillConfig paybillConfig) {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(
                         ResponseTemplate.builder()
@@ -63,7 +69,7 @@ public class PaymentsResource {
 
     @GetMapping("configure-paybill")
     public ResponseEntity<ResponseTemplate<?>> allConfigurations(@RequestParam(defaultValue = "0") int page,
-                                                              @RequestParam(defaultValue = "20") int size)  {
+                                                                 @RequestParam(defaultValue = "20") int size) {
         Pageable pageable = PageRequest.of(page, size);
         Page<PaybillConfig> paybillConfigPage = paybillConfigService.getAll(pageable);
         return ResponseEntity.ok().body(
@@ -77,7 +83,7 @@ public class PaymentsResource {
     }
 
     @PutMapping("configure-paybill/{uid}")
-    public ResponseEntity<ResponseTemplate<?>> updatePaybillConfiguration(@RequestBody PaybillConfig paybillConfig){
+    public ResponseEntity<ResponseTemplate<?>> updatePaybillConfiguration(@RequestBody PaybillConfig paybillConfig) {
         return ResponseEntity.status(HttpStatus.OK.value()).body(
                 ResponseTemplate.builder()
                         .data(paybillConfigService.update(paybillConfig))
