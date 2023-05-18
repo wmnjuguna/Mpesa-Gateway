@@ -2,7 +2,6 @@ package app.fortuneconnect.payments.Resources;
 
 import app.fortuneconnect.payments.DTO.ClaimSTKPayment;
 import app.fortuneconnect.payments.DTO.ResponseTemplate;
-import app.fortuneconnect.payments.DTO.Responses.StkCallbackResponseBody;
 import app.fortuneconnect.payments.DTO.Responses.StkCallbackResponseDTO;
 import app.fortuneconnect.payments.Models.Configuration.PaybillConfig;
 import app.fortuneconnect.payments.Models.Configuration.PaybillConfigService;
