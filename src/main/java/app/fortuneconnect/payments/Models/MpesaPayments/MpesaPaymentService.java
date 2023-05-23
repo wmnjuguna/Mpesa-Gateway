@@ -10,7 +10,6 @@ import app.fortuneconnect.payments.Models.StkLogs.StkLog;
 import app.fortuneconnect.payments.Models.StkLogs.StkLogService;
 import app.fortuneconnect.payments.Utils.Const.MpesaStaticStrings;
 import app.fortuneconnect.payments.Utils.MpesaActions;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,7 +22,7 @@ import java.util.UUID;
 
 import static app.fortuneconnect.payments.Utils.Enums.TransactionTypeEnum.CustomerPaybillOnline;
 
-@Service @Slf4j
+@Service
 public class MpesaPaymentService implements MpesaPaymentOperations {
 
     private final MpesaPaymentRepository mpesaPaymentRepository;
@@ -92,7 +91,6 @@ public class MpesaPaymentService implements MpesaPaymentOperations {
                 confirmationOrValidationResponse.getMSISDN(), confirmationOrValidationResponse.getTransAmount(),  new Date(),
                 confirmationOrValidationResponse.getBusinessShortCode(),  null, MpesaStaticStrings.MPESA_COLLECTION ,
                 false, confirmationOrValidationResponse.getBillRefNumber(), MpesaStaticStrings.CREDIT,null);
-        log.info("Payment {}", payment);
         actions.callBackWithConfirmationOrFailure(confirmationOrValidationResponse.getBillRefNumber(), confirmationOrValidationResponse.getTransAmount(),
                 confirmationOrValidationResponse.getTransID(),null, 0);
         mpesaPaymentRepository.save(payment);
