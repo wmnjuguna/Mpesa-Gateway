@@ -10,6 +10,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.text.ParseException;
 
+import static sun.security.ssl.SSLLogger.info;
+
 @Service @Transactional @Slf4j
 public class StkLogService implements StkLogOperations{
 
@@ -38,6 +40,7 @@ public class StkLogService implements StkLogOperations{
         stkLog.setResultCode(callback.getBody().getStkCallback().getResultCode());
         log.info("Stk Log {} and  call back {} Result = {}", stkLog.getResultCode(), callback, callback.getBody().getStkCallback().getResultCode());
         if(callback.getBody().getStkCallback().getResultCode() == 0){
+            log.info("I hae that I am fooling around");
             callback.getBody().getStkCallback().getCallbackMetadata().getItem().forEach(
                     item -> {
                         switch (item.getName()){
