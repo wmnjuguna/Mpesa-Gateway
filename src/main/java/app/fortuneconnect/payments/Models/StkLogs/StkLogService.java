@@ -10,8 +10,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.text.ParseException;
 
-import static sun.security.ssl.SSLLogger.info;
-
 @Service @Transactional @Slf4j
 public class StkLogService implements StkLogOperations{
 
