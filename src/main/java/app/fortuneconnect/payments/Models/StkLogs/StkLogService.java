@@ -33,12 +33,9 @@ public class StkLogService implements StkLogOperations{
 
     @Override
     public StkLog updateLog(StkCallbackResponseDTO callback) {
-        log.info("Updating {}", callback);
         StkLog stkLog = retriveByMerchantId(callback.getBody().getStkCallback().getMerchantRequestID());
         stkLog.setResultCode(callback.getBody().getStkCallback().getResultCode());
-        log.info("Stk Log {} and  call back {} Result = {}", stkLog.getResultCode(), callback, callback.getBody().getStkCallback().getResultCode());
         if(callback.getBody().getStkCallback().getResultCode() == 0){
-            log.info("I hae that I am fooling around");
             callback.getBody().getStkCallback().getCallbackMetadata().getItem().forEach(
                     item -> {
                         switch (item.getName()){
@@ -57,8 +54,7 @@ public class StkLogService implements StkLogOperations{
                     }
             );
             stkLog.getMpesaPayment().setTransactionStatus(true);
-        }
-        log.info("CallbackUrl {}",stkLog.getCallbackUrl());
+        };
         actions.callBackWithConfirmationOrFailure(stkLog.getMpesaPayment().getAccountNo(),
                 stkLog.getMpesaPayment().getTransactionAmount(),
                 stkLog.getMpesaPayment().getMpesaTransactionNo(),
