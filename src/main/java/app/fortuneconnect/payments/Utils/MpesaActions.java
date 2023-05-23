@@ -78,7 +78,7 @@ public class MpesaActions {
         responseEntity.getBody();
     }
 
-    public void callBackWithConfirmationOrFailure( @NonNull String paymentReference, double amount, @NonNull String receiptNo, String callbackUrl, int resultCode){
+    public void callBackWithConfirmationOrFailure( String paymentReference, double amount, String receiptNo, String callbackUrl, int resultCode){
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.setAccept(List.of(MediaType.APPLICATION_JSON));
