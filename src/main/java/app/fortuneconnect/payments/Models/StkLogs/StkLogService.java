@@ -58,6 +58,7 @@ public class StkLogService implements StkLogOperations{
             );
             stkLog.getMpesaPayment().setTransactionStatus(true);
         }
+        log.info("CallbackUrl {}",stkLog.getCallbackUrl());
         actions.callBackWithConfirmationOrFailure(stkLog.getMpesaPayment().getAccountNo(),stkLog.getMpesaPayment().getTransactionAmount(), stkLog.getMpesaPayment().getMpesaTransactionNo(),
                 stkLog.getCallbackUrl(), stkLog.getResultCode());
         return stkLogRepository.save(stkLog);
