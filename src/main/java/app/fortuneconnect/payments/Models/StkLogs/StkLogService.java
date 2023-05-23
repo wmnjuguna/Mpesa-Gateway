@@ -10,13 +10,15 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.text.ParseException;
 
-@Service @Transactional @Slf4j
-public class StkLogService implements StkLogOperations{
+@Service
+@Transactional
+@Slf4j
+public class StkLogService implements StkLogOperations {
 
-    private  final StkLogRepository stkLogRepository;
+    private final StkLogRepository stkLogRepository;
     private final MpesaActions actions;
 
-    public StkLogService(StkLogRepository stkLogRepository, MpesaActions mpesaActions){
+    public StkLogService(StkLogRepository stkLogRepository, MpesaActions mpesaActions) {
         this.stkLogRepository = stkLogRepository;
         this.actions = mpesaActions;
     }
@@ -35,12 +37,14 @@ public class StkLogService implements StkLogOperations{
     public StkLog updateLog(StkCallbackResponseDTO callback) {
         StkLog stkLog = retriveByMerchantId(callback.getBody().getStkCallback().getMerchantRequestID());
         stkLog.setResultCode(callback.getBody().getStkCallback().getResultCode());
-        if(callback.getBody().getStkCallback().getResultCode() == 0){
+        if (callback.getBody().getStkCallback().getResultCode() == 0) {
             callback.getBody().getStkCallback().getCallbackMetadata().getItem().forEach(
                     item -> {
-                        switch (item.getName()){
-                            case MpesaStaticStrings.MPESA_RECEIPT_NO -> stkLog.getMpesaPayment().setMpesaTransactionNo(item.getValue().toString());
-                            case MpesaStaticStrings.AMOUNT -> stkLog.getMpesaPayment().setTransactionAmount((Double) item.getValue());
+                        switch (item.getName()) {
+                            case MpesaStaticStrings.MPESA_RECEIPT_NO ->
+                                    stkLog.getMpesaPayment().setMpesaTransactionNo(item.getValue().toString());
+                            case MpesaStaticStrings.AMOUNT ->
+                                    stkLog.getMpesaPayment().setTransactionAmount((Double) item.getValue());
                             case MpesaStaticStrings.TRANSACTION_DATE -> {
                                 try {
                                     stkLog.getMpesaPayment().setTransactionTime(StringToDateConverter.parse(item.getValue().toString()));
@@ -48,13 +52,15 @@ public class StkLogService implements StkLogOperations{
                                     throw new RuntimeException(e);
                                 }
                             }
-                            case MpesaStaticStrings.BALANCE -> {}
+                            case MpesaStaticStrings.BALANCE -> {
+                            }
                             default -> stkLog.getMpesaPayment().setPhoneNumber(item.getValue().toString());
                         }
                     }
             );
             stkLog.getMpesaPayment().setTransactionStatus(true);
-        };
+        }
+        ;
         actions.callBackWithConfirmationOrFailure(stkLog.getMpesaPayment().getAccountNo(),
                 stkLog.getMpesaPayment().getTransactionAmount(),
                 stkLog.getMpesaPayment().getMpesaTransactionNo(),
