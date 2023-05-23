@@ -9,7 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.text.ParseException;
 
-@Service
+@Service @Transactional
 public class StkLogService implements StkLogOperations{
 
     private  final StkLogRepository stkLogRepository;
@@ -30,7 +30,6 @@ public class StkLogService implements StkLogOperations{
         return stkLogRepository.findByStkLogUid(uid);
     }
 
-    @Transactional
     @Override
     public StkLog updateLog(StkCallbackResponseDTO callback) {
         StkLog log = retriveByMerchantId(callback.getBody().getStkCallback().getMerchantRequestID());

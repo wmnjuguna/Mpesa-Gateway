@@ -100,6 +100,7 @@ public class MpesaActions {
         else {
             ResponseTemplate<?> request = ResponseTemplate.builder().error(MpesaStaticStrings.PAYMENT_UNSUCCESSFUL).build();
             HttpEntity<ResponseTemplate<?>> requestHttpEntity = new HttpEntity<>(request, headers);
+            log.info("Sending failure {}",requestHttpEntity.getBody());
             template.exchange(callbackUrl, HttpMethod.POST, requestHttpEntity, Void.class);
         }
     }
