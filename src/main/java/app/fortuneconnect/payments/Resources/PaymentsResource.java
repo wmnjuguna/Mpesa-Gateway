@@ -53,6 +53,7 @@ public class PaymentsResource {
 
     @PostMapping("confirm")
     public ResponseEntity<ResponseTemplate<?>> confirm(MpesaConfirmationOrValidationResponse confirmationOrValidationResponse) {
+        log.info("Confirmation {}", confirmationOrValidationResponse);
         mpesaPaymentService.recordConfirmationPayment(confirmationOrValidationResponse);
         return ResponseEntity.ok().body(null);
     }

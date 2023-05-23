@@ -92,6 +92,7 @@ public class MpesaPaymentService implements MpesaPaymentOperations {
                 confirmationOrValidationResponse.getMSISDN(), confirmationOrValidationResponse.getTransAmount(),  new Date(),
                 confirmationOrValidationResponse.getBusinessShortCode(),  null, MpesaStaticStrings.MPESA_COLLECTION ,
                 false, confirmationOrValidationResponse.getBillRefNumber(), MpesaStaticStrings.CREDIT,null);
+        log.info("Payment {}", payment);
         actions.callBackWithConfirmationOrFailure(confirmationOrValidationResponse.getBillRefNumber(), confirmationOrValidationResponse.getTransAmount(),
                 confirmationOrValidationResponse.getTransID(),null, 0);
         mpesaPaymentRepository.save(payment);
