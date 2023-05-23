@@ -36,7 +36,7 @@ public class StkLogService implements StkLogOperations{
         log.info("Updating {}", callback);
         StkLog stkLog = retriveByMerchantId(callback.getBody().getStkCallback().getMerchantRequestID());
         stkLog.setResultCode(callback.getBody().getStkCallback().getResultCode());
-        log.info("Stk Log {} and  call back {}", stkLog, callback);
+        log.info("Stk Log {} and  call back {} Result = {}", stkLog.getResultCode(), callback, callback.getBody().getStkCallback().getResultCode());
         if(callback.getBody().getStkCallback().getResultCode() == 0){
             callback.getBody().getStkCallback().getCallbackMetadata().getItem().forEach(
                     item -> {

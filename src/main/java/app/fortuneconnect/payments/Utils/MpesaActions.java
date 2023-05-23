@@ -82,6 +82,7 @@ public class MpesaActions {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.setAccept(List.of(MediaType.APPLICATION_JSON));
+        log.info("Result code is {}", resultCode);
 //        if(Objects.isNull(callbackUrl)) return;
         if(resultCode == 0){
             ResponseTemplate<PaymentConfirmationRequest> request = ResponseTemplate.<PaymentConfirmationRequest>builder()
