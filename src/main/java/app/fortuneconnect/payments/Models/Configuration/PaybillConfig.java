@@ -1,5 +1,6 @@
 package app.fortuneconnect.payments.Models.Configuration;
 
+import app.fortuneconnect.payments.Utils.Enums.MpesaResponseType;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
@@ -19,9 +20,10 @@ import java.util.Date;
 public class PaybillConfig {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @JsonProperty(access=JsonProperty.Access.WRITE_ONLY)
+    @JsonProperty(access=JsonProperty.Access.READ_ONLY)
     private Long id;
     @Column(length = 36, nullable = false, unique = true)
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private String paybillUid;
     @Column(length = 10, unique = true, nullable = false)
     private Integer paybillNo;
@@ -38,6 +40,9 @@ public class PaybillConfig {
     private String confirmationUrl;
     private String validationUrl;
     private String stkCallbackUrl;
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    private MpesaResponseType responseType;
     @CreationTimestamp
     @Column(nullable = false, updatable = false)
     @Temporal(TemporalType.TIMESTAMP)

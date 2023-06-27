@@ -74,7 +74,8 @@ public class MpesaActions {
                 .responseType(responseType)
                 .build();
         HttpEntity<URLRegistrationRequestDTO> requestEntity = new HttpEntity<>(request, headers);
-        ResponseEntity<URLRegistrationResponseDTO> responseEntity = template.exchange(urlRegistrationUrl, HttpMethod.POST, requestEntity, URLRegistrationResponseDTO.class);
+        ResponseEntity<URLRegistrationResponseDTO> responseEntity = template.exchange(urlRegistrationUrl, HttpMethod.POST,
+                requestEntity, URLRegistrationResponseDTO.class);
         responseEntity.getBody();
     }
 
