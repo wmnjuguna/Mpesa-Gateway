@@ -45,7 +45,6 @@ public class MpesaActions {
         if(!response.getStatusCode().is2xxSuccessful()){
             throw new AuthenticationFailed();
         }
-        log.info("Token {}", response.getBody().getAccessToken());
         return response.getBody();
     }
 

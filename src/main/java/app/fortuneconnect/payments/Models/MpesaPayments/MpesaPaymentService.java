@@ -10,12 +10,10 @@ import app.fortuneconnect.payments.Models.StkLogs.StkLog;
 import app.fortuneconnect.payments.Models.StkLogs.StkLogService;
 import app.fortuneconnect.payments.Utils.Const.MpesaStaticStrings;
 import app.fortuneconnect.payments.Utils.MpesaActions;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.nio.charset.StandardCharsets;
-import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -27,7 +25,7 @@ import java.util.UUID;
 
 import static app.fortuneconnect.payments.Utils.Enums.TransactionTypeEnum.CustomerPaybillOnline;
 
-@Service @Slf4j
+@Service
 public class MpesaPaymentService implements MpesaPaymentOperations {
 
     private final MpesaPaymentRepository mpesaPaymentRepository;
@@ -55,9 +53,6 @@ public class MpesaPaymentService implements MpesaPaymentOperations {
         PaybillConfig config = this.paybillConfigService.retrievePaybillConfiguration(stkPayment.getPaybill().toString(), "no");
 
         String password = stkPayment.getPaybill()+new String(Base64.getDecoder().decode(config.getPassKey()))+timeStamp;
-        log.info("PassKey {}", new String(Base64.getDecoder().decode(config.getPassKey())));
-        log.info("TimeTamp {}", timeStamp);
-        log.info("Password is {}", password);
 
         MpesaPayment payment = new MpesaPayment(null, UUID.randomUUID().toString(), null,
                 stkPayment.getPhoneNo(), stkPayment.getAmount(), new Date(),
