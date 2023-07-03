@@ -16,6 +16,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.Base64;
 import java.util.Date;
 import java.util.Objects;
@@ -46,7 +49,7 @@ public class MpesaPaymentService implements MpesaPaymentOperations {
     @Override
     public StkLog requestPayment(ClaimSTKPayment stkPayment){
 
-        String timeStamp = parseDate(new Date());
+        String timeStamp = parseDate(LocalDateTime.now());
 
         PaybillConfig config = this.paybillConfigService.retrievePaybillConfiguration(stkPayment.getPaybill().toString(), "no");
 
@@ -100,9 +103,11 @@ public class MpesaPaymentService implements MpesaPaymentOperations {
         mpesaPaymentRepository.save(payment);
     }
 
-    private String parseDate(Date date){
+    private String parseDate(LocalDateTime date){
+        ZoneId zoneId = ZoneId.of("Africa/Nairobi");
+        ZonedDateTime zonedDateTime = date.atZone(zoneId);
         SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss");
-        return formatter.format(date);
+        return formatter.format(zonedDateTime);
     }
 
 
