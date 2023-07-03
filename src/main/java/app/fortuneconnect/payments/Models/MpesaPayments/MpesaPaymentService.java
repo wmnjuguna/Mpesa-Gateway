@@ -19,6 +19,7 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Base64;
 import java.util.Date;
 import java.util.Objects;
@@ -106,8 +107,8 @@ public class MpesaPaymentService implements MpesaPaymentOperations {
     private String parseDate(LocalDateTime date){
         ZoneId zoneId = ZoneId.of("Africa/Nairobi");
         ZonedDateTime zonedDateTime = date.atZone(zoneId);
-        SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss");
-        return formatter.format(zonedDateTime);
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
+        return zonedDateTime.format(formatter);
     }
 
 
