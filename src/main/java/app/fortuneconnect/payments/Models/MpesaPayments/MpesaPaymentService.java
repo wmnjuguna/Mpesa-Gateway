@@ -107,7 +107,7 @@ public class MpesaPaymentService implements MpesaPaymentOperations {
     private String parseDate(LocalDateTime date){
         ZoneId zoneId = ZoneId.of("Africa/Nairobi");
         ZonedDateTime zonedDateTime = date.atZone(zoneId);
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmss").withZone(zoneId);
         return zonedDateTime.format(formatter);
     }
 
