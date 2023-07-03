@@ -45,6 +45,7 @@ public class MpesaActions {
         if(!response.getStatusCode().is2xxSuccessful()){
             throw new AuthenticationFailed();
         }
+        log.info("Token {}", response.getBody().getAccessToken());
         return response.getBody();
     }
 
@@ -54,7 +55,8 @@ public class MpesaActions {
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.setBearerAuth(response.getAccessToken());
         HttpEntity<MpesaExpressRequestDTO> requestEntity = new HttpEntity<>(request, headers);
-        ResponseEntity<MpesaExpressResponseDTO> responseEntity = template.exchange(mpesaExpressUrl, HttpMethod.POST, requestEntity, MpesaExpressResponseDTO.class);
+        ResponseEntity<MpesaExpressResponseDTO> responseEntity = template.exchange(mpesaExpressUrl, HttpMethod.POST,
+                requestEntity, MpesaExpressResponseDTO.class);
         if(!responseEntity.getStatusCode().is2xxSuccessful()){
             throw new StkPushFailed();
         }
