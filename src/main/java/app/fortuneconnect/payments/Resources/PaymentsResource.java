@@ -4,6 +4,7 @@ import app.fortuneconnect.payments.DTO.ClaimSTKPayment;
 import app.fortuneconnect.payments.DTO.ResponseTemplate;
 import app.fortuneconnect.payments.DTO.Responses.MpesaConfirmationOrValidationResponse;
 import app.fortuneconnect.payments.DTO.Responses.StkCallbackResponseDTO;
+import app.fortuneconnect.payments.DTO.ValidationResponse;
 import app.fortuneconnect.payments.Models.Configuration.PaybillConfig;
 import app.fortuneconnect.payments.Models.Configuration.PaybillConfigService;
 import app.fortuneconnect.payments.Models.MpesaPayments.MpesaPaymentService;
@@ -19,7 +20,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 @CrossOrigin
 @RestController
-@RequestMapping("api/v1/hela")
+@RequestMapping("mobile")
 public class PaymentsResource {
 
     private final MpesaPaymentService mpesaPaymentService;
@@ -48,10 +49,15 @@ public class PaymentsResource {
         return ResponseEntity.ok().body(null);
     }
 
-    @PostMapping("confirm")
+    @PostMapping("confirm/payment")
     public ResponseEntity<ResponseTemplate<?>> confirm(@RequestBody MpesaConfirmationOrValidationResponse confirmationOrValidationResponse) {
         mpesaPaymentService.recordConfirmationPayment(confirmationOrValidationResponse);
         return ResponseEntity.ok().body(null);
+    }
+
+    @PostMapping("validate/payment")
+    public ResponseEntity<?> validate(@RequestBody MpesaConfirmationOrValidationResponse confirmationOrValidationResponse) {
+        return ResponseEntity.ok().body(new ValidationResponse( "Accepted", "0"));
     }
 
     @PostMapping("configure-paybill")
