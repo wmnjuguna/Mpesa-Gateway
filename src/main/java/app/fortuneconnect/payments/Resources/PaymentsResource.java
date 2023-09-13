@@ -10,6 +10,7 @@ import app.fortuneconnect.payments.Models.Configuration.PaybillConfigService;
 import app.fortuneconnect.payments.Models.MpesaPayments.MpesaPaymentService;
 import app.fortuneconnect.payments.Models.StkLogs.StkLogService;
 import app.fortuneconnect.payments.Utils.PaginationUtils;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -19,7 +20,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 @CrossOrigin
-@RestController
+@RestController @Slf4j
 @RequestMapping("mobile")
 public class PaymentsResource {
 
@@ -51,12 +52,14 @@ public class PaymentsResource {
 
     @PostMapping("confirm/payment")
     public ResponseEntity<ResponseTemplate<?>> confirm(@RequestBody MpesaConfirmationOrValidationResponse confirmationOrValidationResponse) {
+        log.info(" Confirmation {}", confirmationOrValidationResponse);
         mpesaPaymentService.recordConfirmationPayment(confirmationOrValidationResponse);
         return ResponseEntity.ok().body(null);
     }
 
     @PostMapping("validate/payment")
     public ResponseEntity<?> validate(@RequestBody MpesaConfirmationOrValidationResponse confirmationOrValidationResponse) {
+        log.info(" Valiadation {}", confirmationOrValidationResponse);
         return ResponseEntity.ok().body(new ValidationResponse( "Accepted", "0"));
     }
 

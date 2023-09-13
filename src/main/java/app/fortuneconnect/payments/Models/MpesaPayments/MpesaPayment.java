@@ -24,7 +24,7 @@ public class MpesaPayment {
     private Double transactionAmount;
     @Column(nullable = false)
     private Date transactionTime;
-    @Column(length = 6)
+    @Column(length = 10)
     private String paybillNo;
     @Column(length = 10)
     private String mpesaTransactionNo;
