@@ -52,14 +52,12 @@ public class PaymentsResource {
 
     @PostMapping("confirm/payment")
     public ResponseEntity<ResponseTemplate<?>> confirm(@RequestBody MpesaConfirmationOrValidationResponse confirmationOrValidationResponse) {
-        log.info(" Confirmation {}", confirmationOrValidationResponse);
         mpesaPaymentService.recordConfirmationPayment(confirmationOrValidationResponse);
         return ResponseEntity.ok().body(null);
     }
 
     @PostMapping("validate/payment")
     public ResponseEntity<?> validate(@RequestBody MpesaConfirmationOrValidationResponse confirmationOrValidationResponse) {
-        log.info(" Valiadation {}", confirmationOrValidationResponse);
         return ResponseEntity.ok().body(new ValidationResponse( "Accepted", "0"));
     }
 
