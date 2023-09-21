@@ -115,6 +115,7 @@ public class MpesaPaymentService implements MpesaPaymentOperations {
                 payment.getPaybillNo(), payment.getCustomerName());
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
+        log.info(" Request {}", paymentCompletionResponse);
         HttpEntity<PaymentCompletionResponse> request = new HttpEntity<>(paymentCompletionResponse, headers);
         try {
             String paymentEndpoint = "http://CBS/api/v1/transactions/payments?channel=MPESA";
