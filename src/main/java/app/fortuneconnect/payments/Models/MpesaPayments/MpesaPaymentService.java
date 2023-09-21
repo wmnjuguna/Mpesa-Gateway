@@ -4,14 +4,23 @@ import app.fortuneconnect.payments.DTO.ClaimSTKPayment;
 import app.fortuneconnect.payments.DTO.MpesaExpressRequestDTO;
 import app.fortuneconnect.payments.DTO.Responses.MpesaConfirmationOrValidationResponse;
 import app.fortuneconnect.payments.DTO.Responses.MpesaExpressResponseDTO;
+import app.fortuneconnect.payments.DTO.Responses.PaymentCompletionResponse;
 import app.fortuneconnect.payments.Models.Configuration.PaybillConfig;
 import app.fortuneconnect.payments.Models.Configuration.PaybillConfigService;
 import app.fortuneconnect.payments.Models.StkLogs.StkLog;
 import app.fortuneconnect.payments.Models.StkLogs.StkLogService;
 import app.fortuneconnect.payments.Utils.Const.MpesaStaticStrings;
 import app.fortuneconnect.payments.Utils.MpesaActions;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.RestClientException;
+import org.springframework.web.client.RestTemplate;
 
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
@@ -25,7 +34,7 @@ import java.util.UUID;
 
 import static app.fortuneconnect.payments.Utils.Enums.TransactionTypeEnum.CustomerPaybillOnline;
 
-@Service
+@Service @Slf4j
 public class MpesaPaymentService implements MpesaPaymentOperations {
 
     private final MpesaPaymentRepository mpesaPaymentRepository;
@@ -35,13 +44,16 @@ public class MpesaPaymentService implements MpesaPaymentOperations {
     private final MpesaActions actions;
 
     private final PaybillConfigService paybillConfigService;
+    private final RestTemplate restTemplate;
 
     public MpesaPaymentService(MpesaPaymentRepository mpesaPaymentRepository, StkLogService stkLogService,
-                               MpesaActions actions, PaybillConfigService paybillConfigService) {
+                               MpesaActions actions, PaybillConfigService paybillConfigService,
+                               RestTemplate restTemplate) {
         this.mpesaPaymentRepository = mpesaPaymentRepository;
         this.stkLogService = stkLogService;
         this.actions = actions;
         this.paybillConfigService = paybillConfigService;
+        this.restTemplate = restTemplate;
     }
 
     @Transactional
@@ -97,6 +109,18 @@ public class MpesaPaymentService implements MpesaPaymentOperations {
         actions.callBackWithConfirmationOrFailure(confirmationOrValidationResponse.getBillRefNumber(), confirmationOrValidationResponse.getTransAmount(),
                 confirmationOrValidationResponse.getTransID(),null, 0);
         mpesaPaymentRepository.save(payment);
+        PaymentCompletionResponse paymentCompletionResponse = new PaymentCompletionResponse(payment.getTransactionTime(),
+                payment.getTransactionAmount(), payment.getMpesaTransactionNo(), payment.getAccountNo(),
+                payment.getPaybillNo(), payment.getCustomerName());
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<PaymentCompletionResponse> request = new HttpEntity<>(paymentCompletionResponse, headers);
+        try {
+            String paymentEndpoint = "http://CBS/api/v1/transactions/payments?channel=MPESA";
+            restTemplate.exchange(paymentEndpoint, HttpMethod.POST, request, Void.class);
+        } catch (RestClientException e) {
+            log.error("Error Posting Payment {}", e.getMessage());
+        }
     }
 
     private String parseDate(LocalDateTime date){

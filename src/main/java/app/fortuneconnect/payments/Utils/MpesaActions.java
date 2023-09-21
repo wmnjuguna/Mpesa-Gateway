@@ -1,7 +1,6 @@
 package app.fortuneconnect.payments.Utils;
 
 import app.fortuneconnect.payments.DTO.MpesaExpressRequestDTO;
-import app.fortuneconnect.payments.DTO.PaymentConfirmationRequest;
 import app.fortuneconnect.payments.DTO.ResponseTemplate;
 import app.fortuneconnect.payments.DTO.Responses.AuthorizationResponse;
 import app.fortuneconnect.payments.DTO.Responses.MpesaExpressResponseDTO;
