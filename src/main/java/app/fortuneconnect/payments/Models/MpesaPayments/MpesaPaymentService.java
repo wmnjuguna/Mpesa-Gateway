@@ -109,6 +109,7 @@ public class MpesaPaymentService implements MpesaPaymentOperations {
         actions.callBackWithConfirmationOrFailure(confirmationOrValidationResponse.getBillRefNumber(), confirmationOrValidationResponse.getTransAmount(),
                 confirmationOrValidationResponse.getTransID(),null, 0);
         mpesaPaymentRepository.save(payment);
+        log.info("Payment {}", payment);
         PaymentCompletionResponse paymentCompletionResponse = new PaymentCompletionResponse(payment.getTransactionTime(),
                 payment.getTransactionAmount(), payment.getMpesaTransactionNo(), payment.getAccountNo(),
                 payment.getPaybillNo(), payment.getCustomerName());
