@@ -8,7 +8,7 @@ import java.util.Date;
 
 @Builder
 @NoArgsConstructor @AllArgsConstructor
-@Entity @Getter @Setter
+@Entity @Getter @Setter @ToString
 public class MpesaPayment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
