@@ -97,4 +97,13 @@ public class PaymentsResource {
         );
     }
 
+    @GetMapping("payments/all")
+    public ResponseEntity<ResponseTemplate<?>> allPayments(){
+        return ResponseEntity.status(HttpStatus.OK).body(
+                ResponseTemplate.builder()
+                        .data(mpesaPaymentService.allPayments())
+                        .message("Payments Retrieved Successfully")
+                        .build()
+        );
+    }
 }

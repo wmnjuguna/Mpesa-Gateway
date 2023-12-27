@@ -5,13 +5,13 @@ import app.fortuneconnect.payments.DTO.MpesaExpressRequestDTO;
 import app.fortuneconnect.payments.DTO.Responses.MpesaConfirmationOrValidationResponse;
 import app.fortuneconnect.payments.DTO.Responses.MpesaExpressResponseDTO;
 import app.fortuneconnect.payments.DTO.Responses.PaymentCompletionResponse;
+import app.fortuneconnect.payments.DTO.UpdatePay;
 import app.fortuneconnect.payments.Models.Configuration.PaybillConfig;
 import app.fortuneconnect.payments.Models.Configuration.PaybillConfigService;
 import app.fortuneconnect.payments.Models.StkLogs.StkLog;
 import app.fortuneconnect.payments.Models.StkLogs.StkLogService;
 import app.fortuneconnect.payments.Utils.Const.MpesaStaticStrings;
 import app.fortuneconnect.payments.Utils.MpesaActions;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -27,10 +27,8 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Base64;
-import java.util.Date;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static app.fortuneconnect.payments.Utils.Enums.TransactionTypeEnum.CustomerPaybillOnline;
 
@@ -102,6 +100,7 @@ public class MpesaPaymentService implements MpesaPaymentOperations {
 
     @Override
     public void recordConfirmationPayment(MpesaConfirmationOrValidationResponse confirmationOrValidationResponse) {
+        if(mpesaPaymentRepository.existsByMpesaTransactionNo(confirmationOrValidationResponse.getTransID())) return;;
         MpesaPayment payment = new MpesaPayment(null, UUID.randomUUID().toString(), confirmationOrValidationResponse.getFirstName(),
                 confirmationOrValidationResponse.getMSISDN(), confirmationOrValidationResponse.getTransAmount(),  new Date(),
                 confirmationOrValidationResponse.getBusinessShortCode(),  confirmationOrValidationResponse.getTransID(), MpesaStaticStrings.MPESA_COLLECTION ,
@@ -121,6 +120,30 @@ public class MpesaPaymentService implements MpesaPaymentOperations {
         } catch (RestClientException e) {
             log.error("Error Posting Payment {}", e.getMessage());
         }
+    }
+
+    public List<app.fortuneconnect.payments.DTO.MpesaPayment> allPayments(){
+        return mpesaPaymentRepository.findAll()
+                .parallelStream()
+                .map(payment -> new app.fortuneconnect.payments.DTO.MpesaPayment
+                        (payment.getMpesaTransactionNo(), payment.getTransactionAmount(),
+                                payment.getAccountNo(), payment.getTransactionTime()))
+                .collect(Collectors.toList());
+    }
+
+    public void updatePay(List<UpdatePay> payList){
+        List<MpesaPayment> mpesaPayments = new ArrayList<>();
+        for (UpdatePay updatePay : payList) {
+            MpesaPayment payment = mpesaPaymentRepository.findById(updatePay.id()).orElse(null);
+            if(payment == null){
+                log.info("Payment Missing with ID {}", updatePay.id());
+                continue;
+            }
+            payment.setCustomerName(updatePay.customerName());
+            payment.setMpesaTransactionNo(updatePay.receiptNo());
+            mpesaPayments.add(payment);
+        }
+        mpesaPaymentRepository.saveAll(mpesaPayments);
     }
 
     private String parseDate(LocalDateTime date){
