@@ -2,50 +2,49 @@ package app.fortuneconnect.payments.Models.MpesaPayments;
 
 import app.fortuneconnect.payments.DTO.ClaimSTKPayment;
 import app.fortuneconnect.payments.DTO.MpesaExpressRequestDTO;
+import app.fortuneconnect.payments.DTO.Responses.MpesaConfirmationOrValidationResponse;
 import app.fortuneconnect.payments.DTO.Responses.MpesaExpressResponseDTO;
+import app.fortuneconnect.payments.DTO.Responses.PaymentCompletionResponse;
+import app.fortuneconnect.payments.DTO.UpdatePay;
 import app.fortuneconnect.payments.Models.Configuration.PaybillConfig;
 import app.fortuneconnect.payments.Models.Configuration.PaybillConfigService;
 import app.fortuneconnect.payments.Models.StkLogs.StkLog;
 import app.fortuneconnect.payments.Models.StkLogs.StkLogService;
 import app.fortuneconnect.payments.Utils.Const.MpesaStaticStrings;
 import app.fortuneconnect.payments.Utils.MpesaActions;
+import app.fortuneconnect.payments.kafka.service.PaymentsProducerService;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.nio.charset.StandardCharsets;
-import java.text.SimpleDateFormat;
-import java.util.Base64;
-import java.util.Date;
-import java.util.Objects;
-import java.util.UUID;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static app.fortuneconnect.payments.Utils.Enums.TransactionTypeEnum.CustomerPaybillOnline;
 
 @Service @Slf4j
+@RequiredArgsConstructor
 public class MpesaPaymentService implements MpesaPaymentOperations {
 
     private final MpesaPaymentRepository mpesaPaymentRepository;
-
+    private final PaymentsProducerService producerService;
     private final StkLogService stkLogService;
-
     private final MpesaActions actions;
-
     private final PaybillConfigService paybillConfigService;
-
-    public MpesaPaymentService(MpesaPaymentRepository mpesaPaymentRepository, StkLogService stkLogService,
-                               MpesaActions actions, PaybillConfigService paybillConfigService) {
-        this.mpesaPaymentRepository = mpesaPaymentRepository;
-        this.stkLogService = stkLogService;
-        this.actions = actions;
-        this.paybillConfigService = paybillConfigService;
-    }
+    private final KafkaTemplate<String, Object> kafkaTemplate;
 
     @Transactional
     @Override
     public StkLog requestPayment(ClaimSTKPayment stkPayment){
 
-        String timeStamp = parseDate(new Date());
+        String timeStamp = parseDate(LocalDateTime.now());
 
         PaybillConfig config = this.paybillConfigService.retrievePaybillConfiguration(stkPayment.getPaybill().toString(), "no");
 
@@ -85,8 +84,54 @@ public class MpesaPaymentService implements MpesaPaymentOperations {
 
     }
 
-    private String parseDate(Date date){
-        SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss");
-        return formatter.format(date);
+    @Override
+    public void recordConfirmationPayment(MpesaConfirmationOrValidationResponse confirmationOrValidationResponse) {
+        if(mpesaPaymentRepository.existsByMpesaTransactionNo(confirmationOrValidationResponse.getTransID())) return;;
+        MpesaPayment payment = new MpesaPayment(null, UUID.randomUUID().toString(), confirmationOrValidationResponse.getFirstName(),
+                confirmationOrValidationResponse.getMSISDN(), confirmationOrValidationResponse.getTransAmount(),  new Date(),
+                confirmationOrValidationResponse.getBusinessShortCode(),  confirmationOrValidationResponse.getTransID(), MpesaStaticStrings.MPESA_COLLECTION ,
+                false, confirmationOrValidationResponse.getBillRefNumber(), MpesaStaticStrings.CREDIT,null);
+        actions.callBackWithConfirmationOrFailure(confirmationOrValidationResponse.getBillRefNumber(), confirmationOrValidationResponse.getTransAmount(),
+                confirmationOrValidationResponse.getTransID(),null, 0);
+        mpesaPaymentRepository.save(payment);
+        PaymentCompletionResponse paymentCompletionResponse = new PaymentCompletionResponse(payment.getTransactionTime(),
+                payment.getTransactionAmount(), payment.getMpesaTransactionNo(), payment.getAccountNo(),
+                payment.getPaybillNo(), payment.getCustomerName());
+        kafkaTemplate.executeInTransaction(operations -> {
+            producerService.sendMessage(paymentCompletionResponse);
+            return null;
+        });
+
+    }
+
+    public List<app.fortuneconnect.payments.DTO.MpesaPayment> allPayments(){
+        return mpesaPaymentRepository.findAll()
+                .parallelStream()
+                .map(payment -> new app.fortuneconnect.payments.DTO.MpesaPayment
+                        (payment.getMpesaTransactionNo(), payment.getTransactionAmount(),
+                                payment.getAccountNo(), payment.getTransactionTime()))
+                .collect(Collectors.toList());
+    }
+
+    public void updatePay(List<UpdatePay> payList){
+        List<MpesaPayment> mpesaPayments = new ArrayList<>();
+        for (UpdatePay updatePay : payList) {
+            MpesaPayment payment = mpesaPaymentRepository.findById(updatePay.id()).orElse(null);
+            if(payment == null){
+                log.info("Payment Missing with ID {}", updatePay.id());
+                continue;
+            }
+            payment.setCustomerName(updatePay.customerName());
+            payment.setMpesaTransactionNo(updatePay.receiptNo());
+            mpesaPayments.add(payment);
+        }
+        mpesaPaymentRepository.saveAll(mpesaPayments);
+    }
+
+    private String parseDate(LocalDateTime date){
+        ZoneId zoneId = ZoneId.of("Africa/Nairobi");
+        ZonedDateTime zonedDateTime = date.atZone(zoneId);
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmss").withZone(zoneId);
+        return zonedDateTime.format(formatter);
     }
 }

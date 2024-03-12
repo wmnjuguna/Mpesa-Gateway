@@ -1,22 +1,24 @@
 package app.fortuneconnect.payments.Models.StkLogs;
 
-import app.fortuneconnect.payments.DTO.Responses.StkCallbackResponseBody;
 import app.fortuneconnect.payments.DTO.Responses.StkCallbackResponseDTO;
 import app.fortuneconnect.payments.Utils.Const.MpesaStaticStrings;
 import app.fortuneconnect.payments.Utils.MpesaActions;
 import app.fortuneconnect.payments.Utils.StringToDateConverter;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.text.ParseException;
 
 @Service
-public class StkLogService implements StkLogOperations{
+@Transactional
+@Slf4j
+public class StkLogService implements StkLogOperations {
 
-    private  final StkLogRepository stkLogRepository;
+    private final StkLogRepository stkLogRepository;
     private final MpesaActions actions;
 
-    public StkLogService(StkLogRepository stkLogRepository, MpesaActions mpesaActions){
+    public StkLogService(StkLogRepository stkLogRepository, MpesaActions mpesaActions) {
         this.stkLogRepository = stkLogRepository;
         this.actions = mpesaActions;
     }
@@ -31,32 +33,39 @@ public class StkLogService implements StkLogOperations{
         return stkLogRepository.findByStkLogUid(uid);
     }
 
-    @Transactional
     @Override
     public StkLog updateLog(StkCallbackResponseDTO callback) {
-        StkLog log = retriveByMerchantId(callback.getBody().getStkCallback().getMerchantRequestID());
-        if(callback.getBody().getStkCallback().getResultCode() == 0){
+        StkLog stkLog = retriveByMerchantId(callback.getBody().getStkCallback().getMerchantRequestID());
+        stkLog.setResultCode(callback.getBody().getStkCallback().getResultCode());
+        if (callback.getBody().getStkCallback().getResultCode() == 0) {
             callback.getBody().getStkCallback().getCallbackMetadata().getItem().forEach(
                     item -> {
-                        switch (item.getName()){
-                            case MpesaStaticStrings.MPESA_RECEIPT_NO -> log.getMpesaPayment().setMpesaTransactionNo(item.getValue().toString());
-                            case MpesaStaticStrings.AMOUNT -> log.getMpesaPayment().setTransactionAmount((Double) item.getValue());
+                        switch (item.getName()) {
+                            case MpesaStaticStrings.MPESA_RECEIPT_NO ->
+                                    stkLog.getMpesaPayment().setMpesaTransactionNo(item.getValue().toString());
+                            case MpesaStaticStrings.AMOUNT ->
+                                    stkLog.getMpesaPayment().setTransactionAmount((Double) item.getValue());
                             case MpesaStaticStrings.TRANSACTION_DATE -> {
                                 try {
-                                    log.getMpesaPayment().setTransactionTime(StringToDateConverter.parse(item.getValue().toString()));
+                                    stkLog.getMpesaPayment().setTransactionTime(StringToDateConverter.parse(item.getValue().toString()));
                                 } catch (ParseException e) {
                                     throw new RuntimeException(e);
                                 }
                             }
-                            case MpesaStaticStrings.BALANCE -> {}
-                            default -> log.getMpesaPayment().setPhoneNumber(item.getValue().toString());
+                            case MpesaStaticStrings.BALANCE -> {
+                            }
+                            default -> stkLog.getMpesaPayment().setPhoneNumber(item.getValue().toString());
                         }
                     }
             );
-            log.getMpesaPayment().setTransactionStatus(true);
+            stkLog.getMpesaPayment().setTransactionStatus(true);
         }
-        actions.callBackWithConfirmationOrFailure(log.getMpesaPayment().getAccountNo(),log.getMpesaPayment().getTransactionAmount(), log.getMpesaPayment().getMpesaTransactionNo(), log.getCallbackUrl());
-        return stkLogRepository.save(log);
+        ;
+        actions.callBackWithConfirmationOrFailure(stkLog.getMpesaPayment().getAccountNo(),
+                stkLog.getMpesaPayment().getTransactionAmount(),
+                stkLog.getMpesaPayment().getMpesaTransactionNo(),
+                stkLog.getCallbackUrl(), stkLog.getResultCode());
+        return stkLogRepository.save(stkLog);
     }
 
     @Override

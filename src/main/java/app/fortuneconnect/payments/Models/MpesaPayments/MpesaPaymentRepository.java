@@ -5,4 +5,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface MpesaPaymentRepository extends JpaRepository<MpesaPayment, Long> {
+    boolean existsByMpesaTransactionNo(String mpesaTransactionNo);
 }

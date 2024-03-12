@@ -1,13 +1,15 @@
 package app.fortuneconnect.payments.Utils;
 
-import app.fortuneconnect.payments.DTO.FortuneConnectRetailPaymentConfirmationRequest;
 import app.fortuneconnect.payments.DTO.MpesaExpressRequestDTO;
+import app.fortuneconnect.payments.DTO.PaymentConfirmationRequest;
+import app.fortuneconnect.payments.DTO.ResponseTemplate;
 import app.fortuneconnect.payments.DTO.Responses.AuthorizationResponse;
 import app.fortuneconnect.payments.DTO.Responses.MpesaExpressResponseDTO;
-import app.fortuneconnect.payments.DTO.URLRegistrationRequestDTO;
 import app.fortuneconnect.payments.DTO.Responses.URLRegistrationResponseDTO;
+import app.fortuneconnect.payments.DTO.URLRegistrationRequestDTO;
 import app.fortuneconnect.payments.Exceptions.AuthenticationFailed;
 import app.fortuneconnect.payments.Exceptions.StkPushFailed;
+import app.fortuneconnect.payments.Utils.Const.MpesaStaticStrings;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +19,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
+import java.util.Objects;
 
 @Component
 @Slf4j
@@ -51,7 +54,8 @@ public class MpesaActions {
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.setBearerAuth(response.getAccessToken());
         HttpEntity<MpesaExpressRequestDTO> requestEntity = new HttpEntity<>(request, headers);
-        ResponseEntity<MpesaExpressResponseDTO> responseEntity = template.exchange(mpesaExpressUrl, HttpMethod.POST, requestEntity, MpesaExpressResponseDTO.class);
+        ResponseEntity<MpesaExpressResponseDTO> responseEntity = template.exchange(mpesaExpressUrl, HttpMethod.POST,
+                requestEntity, MpesaExpressResponseDTO.class);
         if(!responseEntity.getStatusCode().is2xxSuccessful()){
             throw new StkPushFailed();
         }
@@ -71,21 +75,35 @@ public class MpesaActions {
                 .responseType(responseType)
                 .build();
         HttpEntity<URLRegistrationRequestDTO> requestEntity = new HttpEntity<>(request, headers);
-        ResponseEntity<URLRegistrationResponseDTO> responseEntity = template.exchange(urlRegistrationUrl, HttpMethod.POST, requestEntity, URLRegistrationResponseDTO.class);
+        ResponseEntity<URLRegistrationResponseDTO> responseEntity = template.exchange(urlRegistrationUrl, HttpMethod.POST,
+                requestEntity, URLRegistrationResponseDTO.class);
         responseEntity.getBody();
     }
 
-    public void callBackWithConfirmationOrFailure( @NonNull String paymentReference, double amount, @NonNull String receiptNo, @NonNull String callbackUrl){
+    public void callBackWithConfirmationOrFailure( String paymentReference, double amount, String receiptNo, String callbackUrl, int resultCode){
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.setAccept(List.of(MediaType.APPLICATION_JSON));
-        HttpEntity<FortuneConnectRetailPaymentConfirmationRequest> requestHttpEntity = new HttpEntity<>(FortuneConnectRetailPaymentConfirmationRequest.builder()
-                .orderNo(paymentReference)
-                .paymentMethod("MPESA")
-                .amountReceived(amount)
-                .reference(receiptNo)
-                .build(), headers);
-        template.exchange(callbackUrl, HttpMethod.POST, requestHttpEntity, Void.class);
+        if(Objects.isNull(callbackUrl)) return;
+        if(resultCode == 0){
+            ResponseTemplate<PaymentConfirmationRequest> request = ResponseTemplate.<PaymentConfirmationRequest>builder()
+                    .data(PaymentConfirmationRequest.builder()
+                            .billReference(paymentReference)
+                            .paymentMethod("MPESA")
+                            .amountReceived(amount)
+                            .receiptNo(receiptNo)
+                            .build())
+                    .message(MpesaStaticStrings.PAYMENT_SUCCESSFUL)
+                    .build();
+
+            HttpEntity<ResponseTemplate<PaymentConfirmationRequest>> requestHttpEntity = new HttpEntity<>(request, headers);
+            template.exchange(callbackUrl, HttpMethod.POST, requestHttpEntity, Void.class);
+        }
+        else {
+            ResponseTemplate<?> request = ResponseTemplate.builder().error(MpesaStaticStrings.PAYMENT_UNSUCCESSFUL).build();
+            HttpEntity<ResponseTemplate<?>> requestHttpEntity = new HttpEntity<>(request, headers);
+            template.exchange(callbackUrl, HttpMethod.POST, requestHttpEntity, Void.class);
+        }
     }
 
     public void bulkDisbursement(){

@@ -35,6 +35,6 @@ public class ClaimSTKPayment {
     @Max(value = 6, message = "Value does not conform to allowed length")
     private String paymentReference;
 
-    @JsonProperty(value = "paymentReference", required = true)
+    @JsonProperty(value = "callbackUrl", required = true)
     private String callbackUrl;
 }

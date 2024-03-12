@@ -7,12 +7,12 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data @AllArgsConstructor @NoArgsConstructor @Builder
-public class FortuneConnectRetailPaymentConfirmationRequest{
-	@JsonProperty("order_no")
-	private String orderNo;
+public class PaymentConfirmationRequest {
+	@JsonProperty("bill_reference")
+	private String billReference;
 
-	@JsonProperty("reference")
-	private String reference;
+	@JsonProperty("receipt_no")
+	private String receiptNo;
 
 	@JsonProperty("amount_received")
 	private double amountReceived;
