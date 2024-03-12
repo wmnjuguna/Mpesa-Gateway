@@ -4,11 +4,13 @@ import app.fortuneconnect.payments.DTO.ClaimSTKPayment;
 import app.fortuneconnect.payments.DTO.ResponseTemplate;
 import app.fortuneconnect.payments.DTO.Responses.MpesaConfirmationOrValidationResponse;
 import app.fortuneconnect.payments.DTO.Responses.StkCallbackResponseDTO;
+import app.fortuneconnect.payments.DTO.ValidationResponse;
 import app.fortuneconnect.payments.Models.Configuration.PaybillConfig;
 import app.fortuneconnect.payments.Models.Configuration.PaybillConfigService;
 import app.fortuneconnect.payments.Models.MpesaPayments.MpesaPaymentService;
 import app.fortuneconnect.payments.Models.StkLogs.StkLogService;
 import app.fortuneconnect.payments.Utils.PaginationUtils;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -18,8 +20,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 @CrossOrigin
-@RestController
-@RequestMapping("api/v1/hela")
+@RestController @Slf4j
+@RequestMapping("mobile")
 public class PaymentsResource {
 
     private final MpesaPaymentService mpesaPaymentService;
@@ -48,10 +50,15 @@ public class PaymentsResource {
         return ResponseEntity.ok().body(null);
     }
 
-    @PostMapping("confirm")
+    @PostMapping("confirm/payment")
     public ResponseEntity<ResponseTemplate<?>> confirm(@RequestBody MpesaConfirmationOrValidationResponse confirmationOrValidationResponse) {
         mpesaPaymentService.recordConfirmationPayment(confirmationOrValidationResponse);
         return ResponseEntity.ok().body(null);
+    }
+
+    @PostMapping("validate/payment")
+    public ResponseEntity<?> validate(@RequestBody MpesaConfirmationOrValidationResponse confirmationOrValidationResponse) {
+        return ResponseEntity.ok().body(new ValidationResponse( "Accepted", "0"));
     }
 
     @PostMapping("configure-paybill")
@@ -90,4 +97,13 @@ public class PaymentsResource {
         );
     }
 
+    @GetMapping("payments/all")
+    public ResponseEntity<ResponseTemplate<?>> allPayments(){
+        return ResponseEntity.status(HttpStatus.OK).body(
+                ResponseTemplate.builder()
+                        .data(mpesaPaymentService.allPayments())
+                        .message("Payments Retrieved Successfully")
+                        .build()
+        );
+    }
 }

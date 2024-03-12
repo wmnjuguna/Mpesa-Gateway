@@ -3,6 +3,7 @@ package app.fortuneconnect.payments.Models.MpesaPayments;
 import app.fortuneconnect.payments.Models.StkLogs.StkLog;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.UuidGenerator;
 
 import java.util.Date;
 
@@ -13,8 +14,8 @@ public class MpesaPayment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long sn;
-    @GeneratedValue(strategy = GenerationType.UUID)
-    @Column(nullable = false)
+    @Column(nullable = false, length = 36, unique = true, updatable = false)
+    @UuidGenerator
     private String  mpesaPaymentUid;
     @Column(length = 50)
     private String customerName;
@@ -24,18 +25,17 @@ public class MpesaPayment {
     private Double transactionAmount;
     @Column(nullable = false)
     private Date transactionTime;
-    @Column(length = 6)
+    @Column(length = 10)
     private String paybillNo;
     @Column(length = 10)
     private String mpesaTransactionNo;
     @Column(length = 20)
-    private String transactionType; // bulk disbursement or mpesa repayment
+    private String transactionType;
     private Boolean transactionStatus;
     @Column(length = 20)
     private String accountNo;
     @Column(length = 2)
-    private String transactionOperation; // Whether Debit or Credit
+    private String transactionOperation;
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private StkLog stkLog;
-
 }
