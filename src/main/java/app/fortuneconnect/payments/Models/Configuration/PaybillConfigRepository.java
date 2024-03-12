@@ -8,5 +8,5 @@ import java.util.Optional;
 @Repository
 public interface PaybillConfigRepository extends JpaRepository<PaybillConfig, Long> {
     Optional<PaybillConfig> findByPaybillUid(String paybillUid);
-    Optional<PaybillConfig>findByPaybillNo(String paybillNo);
+    Optional<PaybillConfig>findByPaybillNo(Integer paybillNo);
 }

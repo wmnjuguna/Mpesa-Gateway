@@ -3,6 +3,7 @@ package app.fortuneconnect.payments.Models.StkLogs;
 import app.fortuneconnect.payments.Models.MpesaPayments.MpesaPayment;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.UuidGenerator;
 
 @Builder
 @AllArgsConstructor @NoArgsConstructor
@@ -11,7 +12,8 @@ public class StkLog {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long sn;
-    @GeneratedValue(strategy = GenerationType.UUID)
+    @UuidGenerator
+    @Column(length = 36, unique = true, updatable = false, nullable = false)
     private String stkLogUid;
     private String merchantRequestID;
     private String customerMessage;

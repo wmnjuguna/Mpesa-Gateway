@@ -46,7 +46,7 @@ public class PaybillConfigService {
             return this.paybillConfigRepository.findByPaybillUid(uid)
                     .orElseThrow(() -> new ResourceNotFoundException("Paybill Could not be found"));
         } else {
-            return this.paybillConfigRepository.findByPaybillNo(uid)
+            return this.paybillConfigRepository.findByPaybillNo(Integer.valueOf(uid))
                     .orElseThrow(() -> new ResourceNotFoundException("Paybill Could not be found"));
         }
     }
