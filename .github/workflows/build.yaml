@@ -4,6 +4,8 @@ name: CI for Mpesa
 on:
   push:
     branches:
+      - main
+      - staging
       - actions
 jobs:
   build:
@@ -41,8 +43,28 @@ jobs:
           username: ${{ vars.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_PASSWORD }}
 
-      - name: Build and push Docker image
+
+      - name: Get branch name
+        id: get_branch
+        run: echo "branch_name=${GITHUB_REF#refs/heads/}" >> $GITHUB_ENV
+
+      - if: ${{ github.ref == 'refs/heads/staging' }}
+        name: Build and push Docker image for staging
+        run: |
+
+          docker build -t ${{ vars.DOCKERHUB_USERNAME }}/mpesa-gateway:staging .
+          docker push ${{ vars.DOCKERHUB_USERNAME }}/mpesa-gateway:staging
+
+      - if: ${{ github.ref == 'refs/heads/main' }}
+        name: Build and push Docker image for main
         run: |
 
           docker build -t ${{ vars.DOCKERHUB_USERNAME }}/mpesa-gateway:latest .
-          docker push ${{ vars.DOCKERHUB_USERNAME }}/mpesa-gateway:latest
+          docker push ${{ vars.DOCKERHUB_USERNAME }}/mpesa-gateway:latest    
+
+      - if: ${{ github.ref == 'refs/heads/actions' }}
+        name: Build and push Docker image for actions branch
+        run: |
+
+          docker build -t ${{ vars.DOCKERHUB_USERNAME }}/mpesa-gateway:dev .
+          docker push ${{ vars.DOCKERHUB_USERNAME }}/mpesa-gateway:dev
