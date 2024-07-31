@@ -12,9 +12,10 @@ import app.fortuneconnect.payments.Models.StkLogs.StkLog;
 import app.fortuneconnect.payments.Models.StkLogs.StkLogService;
 import app.fortuneconnect.payments.Utils.Const.MpesaStaticStrings;
 import app.fortuneconnect.payments.Utils.MpesaActions;
-import app.fortuneconnect.payments.kafka.service.PaymentsProducerService;
+import app.fortuneconnect.payments.config.rabbit.queues.PaymentsQueus;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.amqp.core.AmqpTemplate;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,13 +33,11 @@ import static app.fortuneconnect.payments.Utils.Enums.TransactionTypeEnum.Custom
 @Service @Slf4j
 @RequiredArgsConstructor
 public class MpesaPaymentService implements MpesaPaymentOperations {
-
     private final MpesaPaymentRepository mpesaPaymentRepository;
-    private final PaymentsProducerService producerService;
     private final StkLogService stkLogService;
     private final MpesaActions actions;
     private final PaybillConfigService paybillConfigService;
-    private final KafkaTemplate<String, Object> kafkaTemplate;
+    private final AmqpTemplate amqpTemplate;
 
     @Transactional
     @Override
@@ -97,11 +96,7 @@ public class MpesaPaymentService implements MpesaPaymentOperations {
         PaymentCompletionResponse paymentCompletionResponse = new PaymentCompletionResponse(payment.getTransactionTime(),
                 payment.getTransactionAmount(), payment.getMpesaTransactionNo(), payment.getAccountNo(),
                 payment.getPaybillNo(), payment.getCustomerName());
-        kafkaTemplate.executeInTransaction(operations -> {
-            producerService.sendMessage(paymentCompletionResponse);
-            return null;
-        });
-
+        amqpTemplate.convertAndSend(PaymentsQueus.PAYMENTS_QUEUE, paymentCompletionResponse);
     }
 
     public List<app.fortuneconnect.payments.DTO.MpesaPayment> allPayments(){
