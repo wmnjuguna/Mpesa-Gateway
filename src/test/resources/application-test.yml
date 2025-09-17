@@ -1,0 +1,25 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:testdb
+    driverClassName: org.h2.Driver
+    username: sa
+    password: password
+  h2:
+    console:
+      enabled: true
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: false
+  profiles:
+    active: test
+
+payments:
+  mpesa:
+    url-registration: https://api.safaricom.co.ke/mpesa/c2b/v1/registerurl
+    authentication-url: https://api.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials
+    stk-push-url: https://api.safaricom.co.ke/mpesa/stkpush/v1/processrequest
+    api:
+      username: test
+      password: test

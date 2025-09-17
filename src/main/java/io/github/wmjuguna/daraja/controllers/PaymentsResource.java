@@ -9,7 +9,6 @@ import io.github.wmjuguna.daraja.entities.PaybillConfig;
 import io.github.wmjuguna.daraja.services.PaybillConfigService;
 import io.github.wmjuguna.daraja.services.MpesaPaymentService;
 import io.github.wmjuguna.daraja.services.StkLogService;
-import io.github.wmjuguna.daraja.utils.PaginationUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -17,7 +16,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 @CrossOrigin
 @RestController @Slf4j
@@ -79,9 +77,7 @@ public class PaymentsResource {
         Page<PaybillConfig> paybillConfigPage = paybillConfigService.getAll(pageable);
         return ResponseEntity.ok().body(
                 ResponseTemplate.builder()
-                        .data(PaginationUtils.getPagedResponse(paybillConfigPage,
-                                ServletUriComponentsBuilder.fromCurrentRequestUri().build().toUriString(),
-                                PaybillConfigService.class, "getAll"))
+                        .data(paybillConfigPage.getContent())
                         .message("Data retrieved Successfully")
                         .build()
         );

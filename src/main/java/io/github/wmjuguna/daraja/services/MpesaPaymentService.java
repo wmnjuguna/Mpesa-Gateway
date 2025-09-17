@@ -12,10 +12,8 @@ import io.github.wmjuguna.daraja.repositories.MpesaPaymentRepository;
 import io.github.wmjuguna.daraja.entities.StkLog;
 import io.github.wmjuguna.daraja.utils.Const.MpesaStaticStrings;
 import io.github.wmjuguna.daraja.utils.MpesaActions;
-import io.github.wmjuguna.daraja.config.rabbit.queues.PaymentsQueus;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.amqp.core.AmqpTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -36,7 +34,6 @@ public class MpesaPaymentService implements MpesaPaymentOperations {
     private final StkLogService stkLogService;
     private final MpesaActions actions;
     private final PaybillConfigService paybillConfigService;
-    private final AmqpTemplate amqpTemplate;
 
     @Transactional
     @Override
@@ -92,10 +89,8 @@ public class MpesaPaymentService implements MpesaPaymentOperations {
         actions.callBackWithConfirmationOrFailure(confirmationOrValidationResponse.getBillRefNumber(), confirmationOrValidationResponse.getTransAmount(),
                 confirmationOrValidationResponse.getTransID(),null, 0);
         mpesaPaymentRepository.save(payment);
-        PaymentCompletionResponse paymentCompletionResponse = new PaymentCompletionResponse(payment.getTransactionTime(),
-                payment.getTransactionAmount(), payment.getMpesaTransactionNo(), payment.getAccountNo(),
-                payment.getPaybillNo(), payment.getCustomerName());
-        amqpTemplate.convertAndSend(PaymentsQueus.PAYMENTS_QUEUE, paymentCompletionResponse);
+        log.info("Payment confirmed: TransactionID={}, Amount={}, Reference={}",
+                payment.getMpesaTransactionNo(), payment.getTransactionAmount(), payment.getAccountNo());
     }
 
     public List<io.github.wmjuguna.daraja.dtos.MpesaPayment> allPayments(){
