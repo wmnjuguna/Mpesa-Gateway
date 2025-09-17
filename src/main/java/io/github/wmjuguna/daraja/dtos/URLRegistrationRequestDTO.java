@@ -2,17 +2,17 @@
 package io.github.wmjuguna.daraja.dtos;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Builder;
-import lombok.Data;
 
-@Data @Builder
-public class URLRegistrationRequestDTO {
+public record URLRegistrationRequestDTO(
     @JsonProperty("ConfirmationURL")
-    private String confirmationURL;
+    String confirmationURL,
+
     @JsonProperty("ResponseType")
-    private String responseType;
+    String responseType,
+
     @JsonProperty("ShortCode")
-    private String shortCode;
+    String shortCode,
+
     @JsonProperty("ValidationURL")
-    private String validationURL;
-}
+    String validationURL
+) {}

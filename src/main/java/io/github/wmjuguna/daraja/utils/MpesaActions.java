@@ -52,7 +52,7 @@ public class MpesaActions {
         AuthorizationResponse response = authenticate(consumerSecret, consumerKey);
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.setBearerAuth(response.getAccessToken());
+        headers.setBearerAuth(response.accessToken());
         HttpEntity<MpesaExpressRequestDTO> requestEntity = new HttpEntity<>(request, headers);
         ResponseEntity<MpesaExpressResponseDTO> responseEntity = template.exchange(mpesaExpressUrl, HttpMethod.POST,
                 requestEntity, MpesaExpressResponseDTO.class);
@@ -67,13 +67,13 @@ public class MpesaActions {
         AuthorizationResponse response =  authenticate(consumerSecret, consumerKey);
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.setBearerAuth(response.getAccessToken());
-        URLRegistrationRequestDTO request = URLRegistrationRequestDTO.builder()
-                .confirmationURL(confirmationUrl)
-                .validationURL(validationUrl)
-                .shortCode(String.valueOf(shortCode))
-                .responseType(responseType)
-                .build();
+        headers.setBearerAuth(response.accessToken());
+        URLRegistrationRequestDTO request = new URLRegistrationRequestDTO(
+                confirmationUrl,
+                responseType,
+                String.valueOf(shortCode),
+                validationUrl
+        );
         HttpEntity<URLRegistrationRequestDTO> requestEntity = new HttpEntity<>(request, headers);
         ResponseEntity<URLRegistrationResponseDTO> responseEntity = template.exchange(urlRegistrationUrl, HttpMethod.POST,
                 requestEntity, URLRegistrationResponseDTO.class);
@@ -86,21 +86,22 @@ public class MpesaActions {
         headers.setAccept(List.of(MediaType.APPLICATION_JSON));
         if(Objects.isNull(callbackUrl)) return;
         if(resultCode == 0){
-            ResponseTemplate<PaymentConfirmationRequest> request = ResponseTemplate.<PaymentConfirmationRequest>builder()
-                    .data(PaymentConfirmationRequest.builder()
-                            .billReference(paymentReference)
-                            .paymentMethod("MPESA")
-                            .amountReceived(amount)
-                            .receiptNo(receiptNo)
-                            .build())
-                    .message(MpesaStaticStrings.PAYMENT_SUCCESSFUL)
-                    .build();
+            ResponseTemplate<PaymentConfirmationRequest> request = new ResponseTemplate<>(
+                    new PaymentConfirmationRequest(
+                            paymentReference,
+                            receiptNo,
+                            amount,
+                            "MPESA"
+                    ),
+                    MpesaStaticStrings.PAYMENT_SUCCESSFUL,
+                    null
+            );
 
             HttpEntity<ResponseTemplate<PaymentConfirmationRequest>> requestHttpEntity = new HttpEntity<>(request, headers);
             template.exchange(callbackUrl, HttpMethod.POST, requestHttpEntity, Void.class);
         }
         else {
-            ResponseTemplate<?> request = ResponseTemplate.builder().error(MpesaStaticStrings.PAYMENT_UNSUCCESSFUL).build();
+            ResponseTemplate<?> request = new ResponseTemplate<>(null, null, MpesaStaticStrings.PAYMENT_UNSUCCESSFUL);
             HttpEntity<ResponseTemplate<?>> requestHttpEntity = new HttpEntity<>(request, headers);
             template.exchange(callbackUrl, HttpMethod.POST, requestHttpEntity, Void.class);
         }

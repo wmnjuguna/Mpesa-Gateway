@@ -2,44 +2,39 @@ package io.github.wmjuguna.daraja.dtos;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Builder;
-import lombok.Data;
 
-@Data
-@Builder
-public class MpesaExpressRequestDTO {
-
+public record MpesaExpressRequestDTO(
 	@JsonProperty("TransactionType")
-	private String transactionType;
+	String transactionType,
 
 	@JsonProperty("Amount")
-	private Double amount;
+	Double amount,
 
 	@JsonProperty("CallBackURL")
-	private String callBackURL;
+	String callBackURL,
 
 	@JsonProperty("PhoneNumber")
-	private String phoneNumber;
+	String phoneNumber,
 
 	@JsonProperty("PartyA")
-	private String partyA;
+	String partyA,
 
 	@JsonProperty("PartyB")
-	private Integer partyB;
+	Integer partyB,
 
 	@JsonProperty("AccountReference")
-	private String accountReference;
+	String accountReference,
 
 	@JsonProperty("TransactionDesc")
-	private String transactionDesc;
+	String transactionDesc,
 
 	@JsonProperty("BusinessShortCode")
-	private Integer businessShortCode;
+	Integer businessShortCode,
 
 	@JsonProperty("Timestamp")
-	private String timestamp;
+	String timestamp,
 
 	@JsonProperty("Password")
 	@JsonFormat(pattern = "YYYYMMDDHHmmss", shape = JsonFormat.Shape.STRING)
-	private String password;
-}
+	String password
+) {}

@@ -1,20 +1,14 @@
 package io.github.wmjuguna.daraja.dtos.Responses;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 
-@Data @Builder @NoArgsConstructor @AllArgsConstructor
-public class URLRegistrationResponseDTO{
-
+public record URLRegistrationResponseDTO(
 	@JsonProperty("ConversationID")
-	private String conversationID;
+	String conversationID,
 
 	@JsonProperty("ResponseDescription")
-	private String responseDescription;
+	String responseDescription,
 
 	@JsonProperty("OriginatorCoversationID")
-	private String originatorCoversationID;
-}
+	String originatorCoversationID
+) {}

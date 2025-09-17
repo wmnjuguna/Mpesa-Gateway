@@ -1,22 +1,17 @@
 package io.github.wmjuguna.daraja.dtos;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 
-@Data @AllArgsConstructor @NoArgsConstructor @Builder
-public class PaymentConfirmationRequest {
+public record PaymentConfirmationRequest(
 	@JsonProperty("bill_reference")
-	private String billReference;
+	String billReference,
 
 	@JsonProperty("receipt_no")
-	private String receiptNo;
+	String receiptNo,
 
 	@JsonProperty("amount_received")
-	private double amountReceived;
+	double amountReceived,
 
 	@JsonProperty("payment_method")
-	private String paymentMethod;
-}
+	String paymentMethod
+) {}

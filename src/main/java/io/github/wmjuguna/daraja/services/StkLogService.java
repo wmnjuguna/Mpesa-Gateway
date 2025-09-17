@@ -38,26 +38,26 @@ public class StkLogService implements StkLogOperations {
 
     @Override
     public StkLog updateLog(StkCallbackResponseDTO callback) {
-        StkLog stkLog = retriveByMerchantId(callback.getBody().getStkCallback().getMerchantRequestID());
-        stkLog.setResultCode(callback.getBody().getStkCallback().getResultCode());
-        if (callback.getBody().getStkCallback().getResultCode() == 0) {
-            callback.getBody().getStkCallback().getCallbackMetadata().getItem().forEach(
+        StkLog stkLog = retriveByMerchantId(callback.body().stkCallback().merchantRequestID());
+        stkLog.setResultCode(callback.body().stkCallback().resultCode());
+        if (callback.body().stkCallback().resultCode() == 0) {
+            callback.body().stkCallback().callbackMetadata().item().forEach(
                     item -> {
-                        switch (item.getName()) {
+                        switch (item.name()) {
                             case MpesaStaticStrings.MPESA_RECEIPT_NO ->
-                                    stkLog.getMpesaPayment().setMpesaTransactionNo(item.getValue().toString());
+                                    stkLog.getMpesaPayment().setMpesaTransactionNo(item.value().toString());
                             case MpesaStaticStrings.AMOUNT ->
-                                    stkLog.getMpesaPayment().setTransactionAmount((Double) item.getValue());
+                                    stkLog.getMpesaPayment().setTransactionAmount((Double) item.value());
                             case MpesaStaticStrings.TRANSACTION_DATE -> {
                                 try {
-                                    stkLog.getMpesaPayment().setTransactionTime(StringToDateConverter.parse(item.getValue().toString()));
+                                    stkLog.getMpesaPayment().setTransactionTime(StringToDateConverter.parse(item.value().toString()));
                                 } catch (ParseException e) {
                                     throw new RuntimeException(e);
                                 }
                             }
                             case MpesaStaticStrings.BALANCE -> {
                             }
-                            default -> stkLog.getMpesaPayment().setPhoneNumber(item.getValue().toString());
+                            default -> stkLog.getMpesaPayment().setPhoneNumber(item.value().toString());
                         }
                     }
             );

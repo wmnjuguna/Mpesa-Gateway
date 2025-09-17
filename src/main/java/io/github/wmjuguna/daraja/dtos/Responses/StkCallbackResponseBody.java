@@ -1,12 +1,8 @@
 package io.github.wmjuguna.daraja.dtos.Responses;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 
-@Data @NoArgsConstructor @AllArgsConstructor
-public class StkCallbackResponseBody{
+public record StkCallbackResponseBody(
 	@JsonProperty("stkCallback")
-	private StkCallback stkCallback;
-}
+	StkCallback stkCallback
+) {}

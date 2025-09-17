@@ -19,40 +19,35 @@ import java.text.ParseException;
 public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(value = { AuthenticationFailed.class })
     public ResponseEntity<ResponseTemplate<?>> handleCustomException(AuthenticationFailed ex) {
-        return  ResponseEntity.status(HttpStatus.UNAUTHORIZED.value()).body(ResponseTemplate.builder()
-                .error(ex.getMessage())
-                .build()
+        return  ResponseEntity.status(HttpStatus.UNAUTHORIZED.value()).body(
+                new ResponseTemplate<>(null, null, ex.getMessage())
         );
     }
 
     @ExceptionHandler(value = { ExpressPaymentUnsuccessful.class })
     public ResponseEntity<ResponseTemplate<?>> handleCustomException(ExpressPaymentUnsuccessful ex) {
-        return  ResponseEntity.status(HttpStatus.UNAUTHORIZED.value()).body(ResponseTemplate.builder()
-                .error(ex.getMessage())
-                .build()
+        return  ResponseEntity.status(HttpStatus.UNAUTHORIZED.value()).body(
+                new ResponseTemplate<>(null, null, ex.getMessage())
         );
     }
 
     @ExceptionHandler(value = { ResourceNotFoundException.class })
     public ResponseEntity<ResponseTemplate<?>> handleCustomException(ResourceNotFoundException ex) {
-        return  ResponseEntity.status(HttpStatus.UNAUTHORIZED.value()).body(ResponseTemplate.builder()
-                .error(ex.getMessage())
-                .build()
+        return  ResponseEntity.status(HttpStatus.UNAUTHORIZED.value()).body(
+                new ResponseTemplate<>(null, null, ex.getMessage())
         );
     }
 
     @ExceptionHandler(value = { NullPointerException.class })
     public ResponseEntity<ResponseTemplate<?>> handleCustomException(NullPointerException ex) {
-        return  ResponseEntity.status(HttpStatus.UNAUTHORIZED.value()).body(ResponseTemplate.builder()
-                .error(ex.getMessage())
-                .build()
+        return  ResponseEntity.status(HttpStatus.UNAUTHORIZED.value()).body(
+                new ResponseTemplate<>(null, null, ex.getMessage())
         );
     }
     @ExceptionHandler(value = { ParseException.class })
     public ResponseEntity<ResponseTemplate<?>> handleCustomException(ParseException ex) {
-        return  ResponseEntity.status(HttpStatus.UNAUTHORIZED.value()).body(ResponseTemplate.builder()
-                .error(ex.getMessage())
-                .build()
+        return  ResponseEntity.status(HttpStatus.UNAUTHORIZED.value()).body(
+                new ResponseTemplate<>(null, null, ex.getMessage())
         );
     }
 }

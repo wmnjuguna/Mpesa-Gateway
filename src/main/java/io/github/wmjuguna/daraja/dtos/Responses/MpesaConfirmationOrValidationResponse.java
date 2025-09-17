@@ -1,50 +1,44 @@
 package io.github.wmjuguna.daraja.dtos.Responses;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
 
-@Data @AllArgsConstructor @NoArgsConstructor @ToString
-public class MpesaConfirmationOrValidationResponse{
-
+public record MpesaConfirmationOrValidationResponse(
 	@JsonProperty("TransactionType")
-	private String transactionType;
+	String transactionType,
 
 	@JsonProperty("BillRefNumber")
-	private String billRefNumber;
+	String billRefNumber,
 
 	@JsonProperty("MSISDN")
-	private String mSISDN;
+	String mSISDN,
 
 	@JsonProperty("FirstName")
-	private String firstName;
+	String firstName,
 
 	@JsonProperty("MiddleName")
-	private String middleName;
+	String middleName,
 
 	@JsonProperty("BusinessShortCode")
-	private String businessShortCode;
+	String businessShortCode,
 
 	@JsonProperty("OrgAccountBalance")
-	private String orgAccountBalance;
+	String orgAccountBalance,
 
 	@JsonProperty("TransAmount")
-	private double transAmount;
+	double transAmount,
 
 	@JsonProperty("ThirdPartyTransID")
-	private String thirdPartyTransID;
+	String thirdPartyTransID,
 
 	@JsonProperty("InvoiceNumber")
-	private String invoiceNumber;
+	String invoiceNumber,
 
 	@JsonProperty("LastName")
-	private String lastName;
+	String lastName,
 
 	@JsonProperty("TransID")
-	private String transID;
+	String transID,
 
 	@JsonProperty("TransTime")
-	private String transTime;
-}
+	String transTime
+) {}

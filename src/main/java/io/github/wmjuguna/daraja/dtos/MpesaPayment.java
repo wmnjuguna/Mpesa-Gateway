@@ -1,4 +1,18 @@
 package io.github.wmjuguna.daraja.dtos;
 
-public record MpesaPayment(String receiptNo, double tranAmount, String accountNo, java.util.Date tranTime) {
-}
+import com.fasterxml.jackson.annotation.JsonProperty;
+import java.util.Date;
+
+public record MpesaPayment(
+    @JsonProperty("receiptNo")
+    String receiptNo,
+
+    @JsonProperty("tranAmount")
+    double tranAmount,
+
+    @JsonProperty("accountNo")
+    String accountNo,
+
+    @JsonProperty("tranTime")
+    Date tranTime
+) {}

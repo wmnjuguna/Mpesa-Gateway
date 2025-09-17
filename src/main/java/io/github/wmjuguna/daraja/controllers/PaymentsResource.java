@@ -36,9 +36,7 @@ public class PaymentsResource {
     @PostMapping("request-payment")
     public ResponseEntity<ResponseTemplate<?>> stkPushPayment(@RequestBody ClaimSTKPayment payment) {
         return ResponseEntity.ok().body(
-                ResponseTemplate.builder()
-                        .data(mpesaPaymentService.requestPayment(payment))
-                        .build()
+                new ResponseTemplate<>(mpesaPaymentService.requestPayment(payment), null, null)
         );
     }
 
@@ -63,10 +61,7 @@ public class PaymentsResource {
     public ResponseEntity<ResponseTemplate<?>> configurePaybill(@RequestBody PaybillConfig paybillConfig) {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(
-                        ResponseTemplate.builder()
-                                .data(paybillConfigService.createPaybillConfiguration(paybillConfig))
-                                .message("Configuration created successfully")
-                                .build()
+                        new ResponseTemplate<>(paybillConfigService.createPaybillConfiguration(paybillConfig), "Configuration created successfully", null)
                 );
     }
 
@@ -76,30 +71,21 @@ public class PaymentsResource {
         Pageable pageable = PageRequest.of(page, size);
         Page<PaybillConfig> paybillConfigPage = paybillConfigService.getAll(pageable);
         return ResponseEntity.ok().body(
-                ResponseTemplate.builder()
-                        .data(paybillConfigPage.getContent())
-                        .message("Data retrieved Successfully")
-                        .build()
+                new ResponseTemplate<>(paybillConfigPage.getContent(), "Data retrieved Successfully", null)
         );
     }
 
     @PutMapping("configure-paybill/{uid}")
     public ResponseEntity<ResponseTemplate<?>> updatePaybillConfiguration(@RequestBody PaybillConfig paybillConfig) {
         return ResponseEntity.status(HttpStatus.OK.value()).body(
-                ResponseTemplate.builder()
-                        .data(paybillConfigService.update(paybillConfig))
-                        .message("Configurations Updated Successfully")
-                        .build()
+                new ResponseTemplate<>(paybillConfigService.update(paybillConfig), "Configurations Updated Successfully", null)
         );
     }
 
     @GetMapping("payments/all")
     public ResponseEntity<ResponseTemplate<?>> allPayments(){
         return ResponseEntity.status(HttpStatus.OK).body(
-                ResponseTemplate.builder()
-                        .data(mpesaPaymentService.allPayments())
-                        .message("Payments Retrieved Successfully")
-                        .build()
+                new ResponseTemplate<>(mpesaPaymentService.allPayments(), "Payments Retrieved Successfully", null)
         );
     }
 }

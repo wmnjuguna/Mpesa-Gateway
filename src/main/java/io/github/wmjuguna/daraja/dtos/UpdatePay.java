@@ -1,4 +1,14 @@
 package io.github.wmjuguna.daraja.dtos;
 
-public record UpdatePay(Long id, String customerName, String receiptNo) {
-}
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+public record UpdatePay(
+    @JsonProperty("id")
+    Long id,
+
+    @JsonProperty("customerName")
+    String customerName,
+
+    @JsonProperty("receiptNo")
+    String receiptNo
+) {}

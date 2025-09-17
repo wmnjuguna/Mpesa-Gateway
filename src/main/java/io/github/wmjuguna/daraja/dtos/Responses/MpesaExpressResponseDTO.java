@@ -1,25 +1,20 @@
 package io.github.wmjuguna.daraja.dtos.Responses;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 
-@Data @NoArgsConstructor @AllArgsConstructor
-public class MpesaExpressResponseDTO{
-
+public record MpesaExpressResponseDTO(
 	@JsonProperty("MerchantRequestID")
-	private String merchantRequestID;
+	String merchantRequestID,
 
 	@JsonProperty("ResponseCode")
-	private Integer responseCode;
+	Integer responseCode,
 
 	@JsonProperty("CustomerMessage")
-	private String customerMessage;
+	String customerMessage,
 
 	@JsonProperty("CheckoutRequestID")
-	private String checkoutRequestID;
+	String checkoutRequestID,
 
 	@JsonProperty("ResponseDescription")
-	private String responseDescription;
-}
+	String responseDescription
+) {}

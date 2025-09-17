@@ -41,39 +41,38 @@ public class MpesaPaymentService implements MpesaPaymentOperations {
 
         String timeStamp = parseDate(LocalDateTime.now());
 
-        PaybillConfig config = this.paybillConfigService.retrievePaybillConfiguration(stkPayment.getPaybill().toString(), "no");
+        PaybillConfig config = this.paybillConfigService.retrievePaybillConfiguration(stkPayment.paybill().toString(), "no");
 
-        String password = stkPayment.getPaybill()+new String(Base64.getDecoder().decode(config.getPassKey()))+timeStamp;
+        String password = stkPayment.paybill()+new String(Base64.getDecoder().decode(config.getPassKey()))+timeStamp;
 
         MpesaPayment payment = new MpesaPayment(null, UUID.randomUUID().toString(), null,
-                stkPayment.getPhoneNo(), stkPayment.getAmount(), new Date(),
-                stkPayment.getPaybill().toString(), null, MpesaStaticStrings.MPESA_STK_COLLECTION ,
-                false, stkPayment.getPaymentReference(),MpesaStaticStrings.CREDIT,null,null);
+                stkPayment.phoneNo(), stkPayment.amount(), new Date(),
+                stkPayment.paybill().toString(), null, MpesaStaticStrings.MPESA_STK_COLLECTION ,
+                false, stkPayment.paymentReference(),MpesaStaticStrings.CREDIT,null,null);
 
-        MpesaExpressResponseDTO responseDTO = actions.lipaNaMpesaOnline(MpesaExpressRequestDTO.builder()
-                .accountReference((!Objects.isNull(stkPayment.getPaymentReference())) ? stkPayment.getPaymentReference() : stkPayment.getPhoneNo())
-                .amount(stkPayment.getAmount())
-                .businessShortCode(stkPayment.getPaybill())
-                .partyA(stkPayment.getPhoneNo())
-                .partyB(stkPayment.getPaybill())
-                .callBackURL(new String(Base64.getDecoder().decode(config.getStkCallbackUrl())))
-                .phoneNumber(stkPayment.getPhoneNo())
-                .timestamp(timeStamp)
-                .transactionDesc(stkPayment.getPaybill()+ " /REF " +stkPayment.getPhoneNo())
-                .transactionType(CustomerPaybillOnline.getTransactioType())
-                .password(
-                        Base64.getEncoder().encodeToString(password.getBytes(StandardCharsets.ISO_8859_1)))
-                .build(), new String(Base64.getDecoder().decode(config.getConsumerSecret())),
+        MpesaExpressResponseDTO responseDTO = actions.lipaNaMpesaOnline(new MpesaExpressRequestDTO(
+                CustomerPaybillOnline.getTransactioType(),
+                stkPayment.amount(),
+                new String(Base64.getDecoder().decode(config.getStkCallbackUrl())),
+                stkPayment.phoneNo(),
+                stkPayment.phoneNo(),
+                stkPayment.paybill(),
+                (!Objects.isNull(stkPayment.paymentReference())) ? stkPayment.paymentReference() : stkPayment.phoneNo(),
+                stkPayment.paybill()+ " /REF " +stkPayment.phoneNo(),
+                stkPayment.paybill(),
+                timeStamp,
+                Base64.getEncoder().encodeToString(password.getBytes(StandardCharsets.ISO_8859_1))
+        ), new String(Base64.getDecoder().decode(config.getConsumerSecret())),
                 new String(Base64.getDecoder().decode(config.getConsumerKey())));
 
         return stkLogService.createLog(StkLog.builder()
-                .checkoutRequestID(responseDTO.getCheckoutRequestID())
-                .customerMessage(responseDTO.getCustomerMessage())
-                .merchantRequestID(responseDTO.getMerchantRequestID())
-                .responseCode(responseDTO.getResponseCode())
-                .responseDescription(responseDTO.getResponseDescription())
+                .checkoutRequestID(responseDTO.checkoutRequestID())
+                .customerMessage(responseDTO.customerMessage())
+                .merchantRequestID(responseDTO.merchantRequestID())
+                .responseCode(responseDTO.responseCode())
+                .responseDescription(responseDTO.responseDescription())
                 .mpesaPayment(payment)
-                .callbackUrl(stkPayment.getCallbackUrl())
+                .callbackUrl(stkPayment.callbackUrl())
                 .build()
         );
 
@@ -81,13 +80,13 @@ public class MpesaPaymentService implements MpesaPaymentOperations {
 
     @Override
     public void recordConfirmationPayment(MpesaConfirmationOrValidationResponse confirmationOrValidationResponse) {
-        if(mpesaPaymentRepository.existsByMpesaTransactionNo(confirmationOrValidationResponse.getTransID())) return;;
-        MpesaPayment payment = new MpesaPayment(null, UUID.randomUUID().toString(), confirmationOrValidationResponse.getFirstName(),
-                confirmationOrValidationResponse.getMSISDN(), confirmationOrValidationResponse.getTransAmount(),  new Date(),
-                confirmationOrValidationResponse.getBusinessShortCode(),  confirmationOrValidationResponse.getTransID(), MpesaStaticStrings.MPESA_COLLECTION ,
-                false, confirmationOrValidationResponse.getBillRefNumber(), MpesaStaticStrings.CREDIT,null,null);
-        actions.callBackWithConfirmationOrFailure(confirmationOrValidationResponse.getBillRefNumber(), confirmationOrValidationResponse.getTransAmount(),
-                confirmationOrValidationResponse.getTransID(),null, 0);
+        if(mpesaPaymentRepository.existsByMpesaTransactionNo(confirmationOrValidationResponse.transID())) return;;
+        MpesaPayment payment = new MpesaPayment(null, UUID.randomUUID().toString(), confirmationOrValidationResponse.firstName(),
+                confirmationOrValidationResponse.mSISDN(), confirmationOrValidationResponse.transAmount(),  new Date(),
+                confirmationOrValidationResponse.businessShortCode(),  confirmationOrValidationResponse.transID(), MpesaStaticStrings.MPESA_COLLECTION ,
+                false, confirmationOrValidationResponse.billRefNumber(), MpesaStaticStrings.CREDIT,null,null);
+        actions.callBackWithConfirmationOrFailure(confirmationOrValidationResponse.billRefNumber(), confirmationOrValidationResponse.transAmount(),
+                confirmationOrValidationResponse.transID(),null, 0);
         mpesaPaymentRepository.save(payment);
         log.info("Payment confirmed: TransactionID={}, Amount={}, Reference={}",
                 payment.getMpesaTransactionNo(), payment.getTransactionAmount(), payment.getAccountNo());
