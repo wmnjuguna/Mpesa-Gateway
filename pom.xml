@@ -8,11 +8,11 @@
         <version>3.3.2</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
-    <groupId>app.fortuneconnect</groupId>
-    <artifactId>payments</artifactId>
-    <version>0.0.2</version>
-    <name>payments</name>
-    <description>Payments Service for Fortune Connect Applications</description>
+    <groupId>io.github.wmjuguna</groupId>
+    <artifactId>daraja</artifactId>
+    <version>0.0.1</version>
+    <name>daraja</name>
+    <description>Daraja M-Pesa Gateway Service</description>
     <properties>
         <java.version>17</java.version>
         <spring-cloud.version>2023.0.3</spring-cloud.version>
