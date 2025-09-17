@@ -1,0 +1,44 @@
+name: Deploy to Production
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.1.0
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          password: ${{ secrets.DEPLOY_PASSWORD }}
+          script: |
+            # Pull latest image
+            docker pull sarafrika/mpesa-gateway:latest
+
+            # Copy docker-compose and env files
+            curl -o docker-compose.prod.yml https://raw.githubusercontent.com/${{ github.repository }}/main/docker-compose.prod.yml
+            curl -o .env.example https://raw.githubusercontent.com/${{ github.repository }}/main/.env.example
+
+            # Create .env file if it doesn't exist
+            if [ ! -f .env ]; then
+              cp .env.example .env
+              echo "Created .env file from .env.example - please update with your values"
+            fi
+
+            # Stop existing container
+            docker-compose -f docker-compose.prod.yml down || true
+
+            # Start with new image
+            docker-compose -f docker-compose.prod.yml --env-file .env up -d
+
+            # Clean up old images
+            docker image prune -f
