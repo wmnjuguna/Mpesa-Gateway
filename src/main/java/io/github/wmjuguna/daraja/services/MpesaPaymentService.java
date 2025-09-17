@@ -48,7 +48,7 @@ public class MpesaPaymentService implements MpesaPaymentOperations {
         MpesaPayment payment = new MpesaPayment(null, UUID.randomUUID().toString(), null,
                 stkPayment.getPhoneNo(), stkPayment.getAmount(), new Date(),
                 stkPayment.getPaybill().toString(), null, MpesaStaticStrings.MPESA_STK_COLLECTION ,
-                false, stkPayment.getPaymentReference(),MpesaStaticStrings.CREDIT,null);
+                false, stkPayment.getPaymentReference(),MpesaStaticStrings.CREDIT,null,null);
 
         MpesaExpressResponseDTO responseDTO = actions.lipaNaMpesaOnline(MpesaExpressRequestDTO.builder()
                 .accountReference((!Objects.isNull(stkPayment.getPaymentReference())) ? stkPayment.getPaymentReference() : stkPayment.getPhoneNo())
@@ -85,7 +85,7 @@ public class MpesaPaymentService implements MpesaPaymentOperations {
         MpesaPayment payment = new MpesaPayment(null, UUID.randomUUID().toString(), confirmationOrValidationResponse.getFirstName(),
                 confirmationOrValidationResponse.getMSISDN(), confirmationOrValidationResponse.getTransAmount(),  new Date(),
                 confirmationOrValidationResponse.getBusinessShortCode(),  confirmationOrValidationResponse.getTransID(), MpesaStaticStrings.MPESA_COLLECTION ,
-                false, confirmationOrValidationResponse.getBillRefNumber(), MpesaStaticStrings.CREDIT,null);
+                false, confirmationOrValidationResponse.getBillRefNumber(), MpesaStaticStrings.CREDIT,null,null);
         actions.callBackWithConfirmationOrFailure(confirmationOrValidationResponse.getBillRefNumber(), confirmationOrValidationResponse.getTransAmount(),
                 confirmationOrValidationResponse.getTransID(),null, 0);
         mpesaPaymentRepository.save(payment);

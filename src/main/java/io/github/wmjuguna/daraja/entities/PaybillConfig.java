@@ -1,6 +1,7 @@
 package io.github.wmjuguna.daraja.entities;
 
 import io.github.wmjuguna.daraja.utils.Enums.MpesaResponseType;
+import io.github.wmjuguna.daraja.utils.converters.MpesaResponseTypeConverter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
@@ -12,6 +13,7 @@ import org.hibernate.annotations.UuidGenerator;
 import java.util.Date;
 
 @Entity
+@Table(name = "merchant_config")
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
@@ -21,32 +23,36 @@ public class PaybillConfig {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @JsonProperty(access=JsonProperty.Access.READ_ONLY)
     private Long id;
-    @Column(length = 36, nullable = false, unique = true, updatable = false)
+    @Column(name = "uuid")
     @UuidGenerator
     private String paybillUid;
-    @Column(length = 10, unique = true, nullable = false)
+    @Column(name = "merchant_number")
     private Integer paybillNo;
-    @Column(length = 100, nullable = false)
+    @Column(name = "organisation_name")
     private String organisationName;
-    @Column(nullable = false)
+    @Column(name = "consumer_secret")
     private String consumerSecret;
-    @Column(nullable = false)
+    @Column(name = "consumer_key")
     private String consumerKey;
+    @Column(name = "pass_key")
     private String passKey;
+    @Column(name = "confirmation_url")
     private String confirmationUrl;
+    @Column(name = "validation_url")
     private String validationUrl;
+    @Column(name = "stk_callback_url")
     private String stkCallbackUrl;
-    @Column(nullable = false)
-    @Enumerated(EnumType.STRING)
+    @Column(name = "response_type")
+    @Convert(converter = MpesaResponseTypeConverter.class)
     private MpesaResponseType responseType;
     @CreationTimestamp
-    @Column(nullable = false, updatable = false)
+    @Column(name = "created_at")
     @Temporal(TemporalType.TIMESTAMP)
     @JsonIgnore
     private Date createdAt;
     @UpdateTimestamp
     @Temporal(TemporalType.TIMESTAMP)
-    @Column( nullable = false)
+    @Column(name = "updated_at")
     @JsonIgnore
     private Date updatedAt;
 }

@@ -8,33 +8,40 @@ import java.util.Date;
 
 @Builder
 @NoArgsConstructor @AllArgsConstructor
-@Entity @Getter @Setter
+@Entity
+@Table(name = "mpesa_payment")
+@Getter @Setter
 public class MpesaPayment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long sn;
-    @Column(nullable = false, length = 36, unique = true, updatable = false)
+    private Long id;
+    @Column(name = "uuid")
     @UuidGenerator
     private String  mpesaPaymentUid;
-    @Column(length = 50)
+    @Column(name = "customer_name")
     private String customerName;
-    @Column(length = 15, nullable = false)
+    @Column(name = "phone_number")
     private String phoneNumber;
-    @Column(nullable = false, columnDefinition="Decimal(10,2)")
+    @Column(name = "transaction_amount")
     private Double transactionAmount;
-    @Column(nullable = false)
+    @Column(name = "transaction_time")
     private Date transactionTime;
-    @Column(length = 10)
+    @Column(name = "paybill_no")
     private String paybillNo;
-    @Column(length = 10)
+    @Column(name = "mpesa_transaction_no")
     private String mpesaTransactionNo;
-    @Column(length = 20)
+    @Column(name = "transaction_type")
     private String transactionType;
+    @Column(name = "transaction_status")
     private Boolean transactionStatus;
-    @Column(length = 20)
+    @Column(name = "account_no")
     private String accountNo;
-    @Column(length = 2)
+    @Column(name = "transaction_operation")
     private String transactionOperation;
+    @Column(name = "stk_log_uuid")
+    private String stkLogUuid;
+
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @JoinColumn(name = "stk_log_uuid", referencedColumnName = "uuid", insertable = false, updatable = false)
     private StkLog stkLog;
 }
