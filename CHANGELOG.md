@@ -1,3 +1,10 @@
+# [1.1.0](https://github.com/wmnjuguna/Mpesa-Gateway/compare/v1.0.0...v1.1.0) (2025-09-21)
+
+
+### Features
+
+* implement comprehensive Swagger/OpenAPI documentation ([ca56591](https://github.com/wmnjuguna/Mpesa-Gateway/commit/ca565917fb0754374aba4094136e09e5af0e5bb2))
+
 # 1.0.0 (2025-09-21)
 
 
