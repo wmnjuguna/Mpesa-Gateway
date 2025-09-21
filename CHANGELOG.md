@@ -1,3 +1,11 @@
+## [1.1.1](https://github.com/wmnjuguna/Mpesa-Gateway/compare/v1.1.0...v1.1.1) (2025-09-21)
+
+
+### Bug Fixes
+
+* ensure deploy workflow runs only after successful build ([1b70f5b](https://github.com/wmnjuguna/Mpesa-Gateway/commit/1b70f5bcda2d2e9e7bb6eed8f59ba8d652fec10e))
+* ensure release workflow runs only after successful build ([ac31c8d](https://github.com/wmnjuguna/Mpesa-Gateway/commit/ac31c8d3b9d8b80cde34a2413e0f01f36edbeef8))
+
 # [1.1.0](https://github.com/wmnjuguna/Mpesa-Gateway/compare/v1.0.0...v1.1.0) (2025-09-21)
 
 
