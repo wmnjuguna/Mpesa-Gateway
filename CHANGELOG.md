@@ -1,3 +1,10 @@
+# [1.2.0](https://github.com/wmnjuguna/Mpesa-Gateway/compare/v1.1.1...v1.2.0) (2025-09-21)
+
+
+### Features
+
+* add manual triggers to build and deploy workflows ([79a34c7](https://github.com/wmnjuguna/Mpesa-Gateway/commit/79a34c7dd28ec14cfcc9bbb69f617735cb18f0be))
+
 ## [1.1.1](https://github.com/wmnjuguna/Mpesa-Gateway/compare/v1.1.0...v1.1.1) (2025-09-21)
 
 
