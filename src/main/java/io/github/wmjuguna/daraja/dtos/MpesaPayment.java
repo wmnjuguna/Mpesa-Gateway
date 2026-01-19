@@ -6,15 +6,15 @@ public record MpesaPayment(
     @JsonProperty("uuid")
     String uuid,
 
-    @JsonProperty("receiptNo")
+    @JsonProperty("receipt_no")
     String receiptNo,
 
-    @JsonProperty("tranAmount")
+    @JsonProperty("tran_amount")
     double tranAmount,
 
-    @JsonProperty("accountNo")
+    @JsonProperty("account_no")
     String accountNo,
 
-    @JsonProperty("tranTime")
+    @JsonProperty("tran_time")
     String tranTime
 ) {}

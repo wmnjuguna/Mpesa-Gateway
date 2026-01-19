@@ -38,8 +38,8 @@ public class StkLogService implements StkLogOperations {
     }
 
     @Override
-    public StkLog retriveLog(String uid) {
-        return stkLogRepository.findByUuid(uid);
+    public StkLog retriveLog(String uuid) {
+        return stkLogRepository.findByUuid(uuid);
     }
 
     @Override

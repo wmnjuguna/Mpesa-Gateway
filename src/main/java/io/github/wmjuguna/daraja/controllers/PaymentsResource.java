@@ -2,15 +2,22 @@ package io.github.wmjuguna.daraja.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.wmjuguna.daraja.dtos.ClaimSTKPayment;
+import io.github.wmjuguna.daraja.dtos.PaybillConfigRequest;
+import io.github.wmjuguna.daraja.dtos.PaybillConfigResponse;
 import io.github.wmjuguna.daraja.dtos.ResponseTemplate;
 import io.github.wmjuguna.daraja.dtos.Responses.MpesaConfirmationOrValidationResponse;
 import io.github.wmjuguna.daraja.dtos.Responses.StkCallbackResponseDTO;
+import io.github.wmjuguna.daraja.dtos.StkLogResponse;
 import io.github.wmjuguna.daraja.dtos.ValidationResponse;
 import io.github.wmjuguna.daraja.entities.PaybillConfig;
+import io.github.wmjuguna.daraja.entities.StkLog;
 import io.github.wmjuguna.daraja.services.PaybillConfigService;
 import io.github.wmjuguna.daraja.services.MpesaPaymentService;
 import io.github.wmjuguna.daraja.services.StkLogService;
+import io.github.wmjuguna.daraja.utils.MpesaResponseType;
 import io.swagger.v3.oas.annotations.Operation;
+
+import java.util.List;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
@@ -133,8 +140,15 @@ public class PaymentsResource {
                     )
             )
             @RequestBody ClaimSTKPayment payment) {
+        StkLog stkLog = mpesaPaymentService.requestPayment(payment);
+        StkLogResponse response = new StkLogResponse(
+                stkLog.getUuid(),
+                stkLog.getRequestPayload(),
+                stkLog.getCallbackPayload(),
+                stkLog.getCallbackUrl()
+        );
         return ResponseEntity.ok().body(
-                new ResponseTemplate<>(mpesaPaymentService.requestPayment(payment), null, null)
+                new ResponseTemplate<>(response, null, null)
         );
     }
 
@@ -328,14 +342,13 @@ public class PaymentsResource {
                                     value = """
                                             {
                                               "data": {
-                                                "id": 1,
                                                 "uuid": "550e8400-e29b-41d4-a716-446655440000",
-                                                "paybill": "174379",
-                                                "passkey": "***encrypted***",
-                                                "consumerKey": "***encrypted***",
-                                                "consumerSecret": "***encrypted***",
-                                                "confirmationUrl": "https://yourdomain.com/confirm",
-                                                "validationUrl": "https://yourdomain.com/validate"
+                                                "paybill_no": 174379,
+                                                "organisation_name": "Example Ltd",
+                                                "confirmation_url": "https://yourdomain.com/confirm",
+                                                "validation_url": "https://yourdomain.com/validate",
+                                                "stk_callback_url": "https://yourdomain.com/mobile/stk",
+                                                "response_type": "Completed"
                                               },
                                               "message": "Configuration created successfully",
                                               "error": null
@@ -355,26 +368,30 @@ public class PaymentsResource {
                     description = "Paybill configuration details",
                     required = true,
                     content = @Content(
-                            schema = @Schema(implementation = PaybillConfig.class),
+                            schema = @Schema(implementation = PaybillConfigRequest.class),
                             examples = @ExampleObject(
                                     name = "Paybill Configuration",
                                     value = """
                                             {
-                                              "paybill": "174379",
-                                              "passkey": "your-passkey-here",
-                                              "consumerKey": "your-consumer-key",
-                                              "consumerSecret": "your-consumer-secret",
-                                              "confirmationUrl": "https://yourdomain.com/mobile/confirm/payment",
-                                              "validationUrl": "https://yourdomain.com/mobile/validate/payment"
+                                              "paybill_no": 174379,
+                                              "organisation_name": "Example Ltd",
+                                              "pass_key": "your-passkey-here",
+                                              "consumer_key": "your-consumer-key",
+                                              "consumer_secret": "your-consumer-secret",
+                                              "confirmation_url": "https://yourdomain.com/mobile/confirm/payment",
+                                              "validation_url": "https://yourdomain.com/mobile/validate/payment",
+                                              "stk_callback_url": "https://yourdomain.com/mobile/stk",
+                                              "response_type": "COMPLETED"
                                             }
                                             """
                             )
                     )
             )
-            @RequestBody PaybillConfig paybillConfig) {
+            @RequestBody PaybillConfigRequest paybillConfig) {
+        PaybillConfig createdConfig = paybillConfigService.createPaybillConfiguration(toPaybillEntity(paybillConfig));
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(
-                        new ResponseTemplate<>(paybillConfigService.createPaybillConfiguration(paybillConfig), "Configuration created successfully", null)
+                        new ResponseTemplate<>(toPaybillResponse(createdConfig), "Configuration created successfully", null)
                 );
     }
 
@@ -397,14 +414,13 @@ public class PaymentsResource {
                                             {
                                               "data": [
                                                 {
-                                                  "id": 1,
                                                   "uuid": "550e8400-e29b-41d4-a716-446655440000",
-                                                  "paybill": "174379",
-                                                  "passkey": "***masked***",
-                                                  "consumerKey": "***masked***",
-                                                  "consumerSecret": "***masked***",
-                                                  "confirmationUrl": "https://yourdomain.com/confirm",
-                                                  "validationUrl": "https://yourdomain.com/validate"
+                                                  "paybill_no": 174379,
+                                                  "organisation_name": "Example Ltd",
+                                                  "confirmation_url": "https://yourdomain.com/confirm",
+                                                  "validation_url": "https://yourdomain.com/validate",
+                                                  "stk_callback_url": "https://yourdomain.com/mobile/stk",
+                                                  "response_type": "Completed"
                                                 }
                                               ],
                                               "message": "Data retrieved Successfully",
@@ -428,12 +444,16 @@ public class PaymentsResource {
             @RequestParam(defaultValue = "20") int size) {
         Pageable pageable = PageRequest.of(page, size);
         Page<PaybillConfig> paybillConfigPage = paybillConfigService.getAll(pageable);
+        List<PaybillConfigResponse> responses = paybillConfigPage.getContent()
+                .stream()
+                .map(this::toPaybillResponse)
+                .toList();
         return ResponseEntity.ok().body(
-                new ResponseTemplate<>(paybillConfigPage.getContent(), "Data retrieved Successfully", null)
+                new ResponseTemplate<>(responses, "Data retrieved Successfully", null)
         );
     }
 
-    @PutMapping("configure-paybill/{uid}")
+    @PutMapping("configure-paybill/{uuid}")
     @Operation(
             summary = "Update Paybill Configuration",
             description = "Updates an existing merchant paybill configuration identified by UUID. All configuration fields can be updated.",
@@ -451,14 +471,13 @@ public class PaymentsResource {
                                     value = """
                                             {
                                               "data": {
-                                                "id": 1,
                                                 "uuid": "550e8400-e29b-41d4-a716-446655440000",
-                                                "paybill": "174379",
-                                                "passkey": "***encrypted***",
-                                                "consumerKey": "***encrypted***",
-                                                "consumerSecret": "***encrypted***",
-                                                "confirmationUrl": "https://yourdomain.com/confirm",
-                                                "validationUrl": "https://yourdomain.com/validate"
+                                                "paybill_no": 174379,
+                                                "organisation_name": "Example Ltd",
+                                                "confirmation_url": "https://yourdomain.com/confirm",
+                                                "validation_url": "https://yourdomain.com/validate",
+                                                "stk_callback_url": "https://yourdomain.com/mobile/stk",
+                                                "response_type": "Completed"
                                               },
                                               "message": "Configurations Updated Successfully",
                                               "error": null
@@ -479,17 +498,20 @@ public class PaymentsResource {
                     required = true,
                     example = "550e8400-e29b-41d4-a716-446655440000"
             )
-            @PathVariable String uid,
+            @PathVariable String uuid,
             @Parameter(
                     description = "Updated paybill configuration data",
                     required = true,
                     content = @Content(
-                            schema = @Schema(implementation = PaybillConfig.class)
+                            schema = @Schema(implementation = PaybillConfigRequest.class)
                     )
             )
-            @RequestBody PaybillConfig paybillConfig) {
+            @RequestBody PaybillConfigRequest paybillConfig) {
+        PaybillConfig updatePayload = toPaybillEntity(paybillConfig);
+        updatePayload.setUuid(uuid);
+        PaybillConfig updated = paybillConfigService.update(updatePayload);
         return ResponseEntity.status(HttpStatus.OK.value()).body(
-                new ResponseTemplate<>(paybillConfigService.update(paybillConfig), "Configurations Updated Successfully", null)
+                new ResponseTemplate<>(toPaybillResponse(updated), "Configurations Updated Successfully", null)
         );
     }
 
@@ -537,5 +559,42 @@ public class PaymentsResource {
         return ResponseEntity.status(HttpStatus.OK).body(
                 new ResponseTemplate<>(mpesaPaymentService.allPayments(), "Payments Retrieved Successfully", null)
         );
+    }
+
+    private PaybillConfigResponse toPaybillResponse(PaybillConfig paybillConfig) {
+        if (paybillConfig == null) {
+            return null;
+        }
+        String responseType = paybillConfig.getResponseType() != null
+                ? paybillConfig.getResponseType().getResponse()
+                : null;
+        return new PaybillConfigResponse(
+                paybillConfig.getUuid(),
+                paybillConfig.getPaybillNo(),
+                paybillConfig.getOrganisationName(),
+                paybillConfig.getConfirmationUrl(),
+                paybillConfig.getValidationUrl(),
+                paybillConfig.getStkCallbackUrl(),
+                responseType
+        );
+    }
+
+    private PaybillConfig toPaybillEntity(PaybillConfigRequest request) {
+        if (request == null) {
+            return null;
+        }
+        PaybillConfig paybillConfig = new PaybillConfig();
+        paybillConfig.setPaybillNo(request.paybillNo());
+        paybillConfig.setOrganisationName(request.organisationName());
+        paybillConfig.setConsumerSecret(request.consumerSecret());
+        paybillConfig.setConsumerKey(request.consumerKey());
+        paybillConfig.setPassKey(request.passKey());
+        paybillConfig.setConfirmationUrl(request.confirmationUrl());
+        paybillConfig.setValidationUrl(request.validationUrl());
+        paybillConfig.setStkCallbackUrl(request.stkCallbackUrl());
+        if (request.responseType() != null) {
+            paybillConfig.setResponseType(MpesaResponseType.valueOf(request.responseType().toUpperCase()));
+        }
+        return paybillConfig;
     }
 }

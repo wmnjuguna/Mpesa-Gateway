@@ -10,13 +10,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.reactive.result.method.annotation.ResponseEntityExceptionHandler;
 
 import java.text.ParseException;
 
 @Order(Ordered.HIGHEST_PRECEDENCE)
 @ControllerAdvice
-public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
+public class CustomExceptionHandler {
     @ExceptionHandler(value = { AuthenticationFailed.class })
     public ResponseEntity<ResponseTemplate<?>> handleCustomException(AuthenticationFailed ex) {
         return  ResponseEntity.status(HttpStatus.UNAUTHORIZED.value()).body(

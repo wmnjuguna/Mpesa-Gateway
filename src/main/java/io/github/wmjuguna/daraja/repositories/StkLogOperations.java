@@ -8,7 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 public interface StkLogOperations {
     @Transactional
     StkLog createLog(StkLog log);
-    StkLog retriveLog(String uid);
+    StkLog retriveLog(String uuid);
 
     @Transactional
     StkLog updateLog(StkCallbackResponseDTO callback, String rawPayload);

@@ -42,12 +42,12 @@ public class PaybillConfigService {
         return paybillConfigRepository.save(paybillConfig);
     }
 
-    public PaybillConfig retrievePaybillConfiguration(String uid, String finder) {
-        if (finder.equalsIgnoreCase("uid")) {
-            return this.paybillConfigRepository.findByUuid(uid)
+    public PaybillConfig retrievePaybillConfiguration(String uuid, String finder) {
+        if (finder.equalsIgnoreCase("uuid")) {
+            return this.paybillConfigRepository.findByUuid(uuid)
                     .orElseThrow(() -> new ResourceNotFoundException("Paybill Could not be found"));
         } else {
-            return this.paybillConfigRepository.findByPaybillNo(Integer.valueOf(uid))
+            return this.paybillConfigRepository.findByPaybillNo(Integer.valueOf(uuid))
                     .orElseThrow(() -> new ResourceNotFoundException("Paybill Could not be found"));
         }
     }
