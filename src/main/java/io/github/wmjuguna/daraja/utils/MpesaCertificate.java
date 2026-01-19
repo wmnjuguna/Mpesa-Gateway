@@ -1,4 +1,4 @@
-package io.github.wmjuguna.daraja.utils.Const;
+package io.github.wmjuguna.daraja.utils;
 
 public class MpesaCertificate {
     public static final String simulationCertificate = "-----BEGIN CERTIFICATE-----\n" +

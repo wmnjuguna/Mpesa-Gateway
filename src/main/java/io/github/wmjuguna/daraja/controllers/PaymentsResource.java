@@ -1,5 +1,6 @@
 package io.github.wmjuguna.daraja.controllers;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.wmjuguna.daraja.dtos.ClaimSTKPayment;
 import io.github.wmjuguna.daraja.dtos.ResponseTemplate;
 import io.github.wmjuguna.daraja.dtos.Responses.MpesaConfirmationOrValidationResponse;
@@ -35,12 +36,14 @@ public class PaymentsResource {
     private final MpesaPaymentService mpesaPaymentService;
     private final PaybillConfigService paybillConfigService;
     private final StkLogService stkLogService;
+    private final ObjectMapper objectMapper;
 
     public PaymentsResource(MpesaPaymentService mpesaPaymentService, PaybillConfigService paybillConfigService,
-                            StkLogService stkLogService) {
+                            StkLogService stkLogService, ObjectMapper objectMapper) {
         this.paybillConfigService = paybillConfigService;
         this.mpesaPaymentService = mpesaPaymentService;
         this.stkLogService = stkLogService;
+        this.objectMapper = objectMapper;
     }
 
     @PostMapping("request-payment")
@@ -196,8 +199,15 @@ public class PaymentsResource {
                             )
                     )
             )
-            @RequestBody StkCallbackResponseDTO callback) {
-        stkLogService.updateLog(callback);
+            @RequestBody String rawPayload) {
+        StkCallbackResponseDTO callback;
+        try {
+            callback = objectMapper.readValue(rawPayload, StkCallbackResponseDTO.class);
+        } catch (com.fasterxml.jackson.core.JsonProcessingException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(new ResponseTemplate<>(null, null, "Invalid callback payload"));
+        }
+        stkLogService.updateLog(callback, rawPayload);
         return ResponseEntity.ok().body(null);
     }
 
@@ -247,8 +257,18 @@ public class PaymentsResource {
                             )
                     )
             )
-            @RequestBody MpesaConfirmationOrValidationResponse confirmationOrValidationResponse) {
-        mpesaPaymentService.recordConfirmationPayment(confirmationOrValidationResponse);
+            @RequestBody String rawPayload) {
+        MpesaConfirmationOrValidationResponse confirmationOrValidationResponse;
+        try {
+            confirmationOrValidationResponse = objectMapper.readValue(
+                    rawPayload,
+                    MpesaConfirmationOrValidationResponse.class
+            );
+        } catch (com.fasterxml.jackson.core.JsonProcessingException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(new ResponseTemplate<>(null, null, "Invalid confirmation payload"));
+        }
+        mpesaPaymentService.recordConfirmationPayment(confirmationOrValidationResponse, rawPayload);
         return ResponseEntity.ok().body(null);
     }
 
@@ -285,8 +305,9 @@ public class PaymentsResource {
                             schema = @Schema(implementation = MpesaConfirmationOrValidationResponse.class)
                     )
             )
-            @RequestBody MpesaConfirmationOrValidationResponse confirmationOrValidationResponse) {
-        return ResponseEntity.ok().body(new ValidationResponse( "Accepted", "0"));
+            @RequestBody String rawPayload) {
+        mpesaPaymentService.recordValidationPayload(rawPayload);
+        return ResponseEntity.ok().body(new ValidationResponse("Accepted", "0"));
     }
 
     @PostMapping("configure-paybill")

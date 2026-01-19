@@ -1,31 +1,25 @@
 package io.github.wmjuguna.daraja.entities;
 
-import io.github.wmjuguna.daraja.utils.Enums.MpesaResponseType;
+import io.github.wmjuguna.daraja.utils.MpesaResponseType;
 import io.github.wmjuguna.daraja.utils.converters.MpesaResponseTypeConverter;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import jakarta.persistence.*;
-import lombok.*;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
-import org.hibernate.annotations.UuidGenerator;
-
-import java.util.Date;
+import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 
 @Entity
 @Table(name = "merchant_config")
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
-@Getter @Setter
-public class PaybillConfig {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @JsonProperty(access=JsonProperty.Access.READ_ONLY)
-    private Long id;
-    @Column(name = "uuid")
-    @UuidGenerator
-    private String paybillUid;
+@Getter
+@Setter
+public class PaybillConfig extends BaseEntity {
     @Column(name = "merchant_number")
     private Integer paybillNo;
     @Column(name = "organisation_name")
@@ -45,14 +39,4 @@ public class PaybillConfig {
     @Column(name = "response_type")
     @Convert(converter = MpesaResponseTypeConverter.class)
     private MpesaResponseType responseType;
-    @CreationTimestamp
-    @Column(name = "created_at")
-    @Temporal(TemporalType.TIMESTAMP)
-    @JsonIgnore
-    private Date createdAt;
-    @UpdateTimestamp
-    @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "updated_at")
-    @JsonIgnore
-    private Date updatedAt;
 }

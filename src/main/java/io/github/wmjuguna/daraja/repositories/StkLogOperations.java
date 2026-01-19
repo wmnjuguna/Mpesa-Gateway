@@ -11,7 +11,7 @@ public interface StkLogOperations {
     StkLog retriveLog(String uid);
 
     @Transactional
-    StkLog updateLog(StkCallbackResponseDTO callback);
+    StkLog updateLog(StkCallbackResponseDTO callback, String rawPayload);
 
     StkLog retriveByMerchantId(String merchantRequestId);
 }

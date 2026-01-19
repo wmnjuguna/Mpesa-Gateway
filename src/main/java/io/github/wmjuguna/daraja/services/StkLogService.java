@@ -1,17 +1,21 @@
 package io.github.wmjuguna.daraja.services;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.wmjuguna.daraja.dtos.Responses.StkCallbackResponseDTO;
 import io.github.wmjuguna.daraja.entities.StkLog;
 import io.github.wmjuguna.daraja.repositories.StkLogOperations;
 import io.github.wmjuguna.daraja.repositories.StkLogRepository;
-import io.github.wmjuguna.daraja.utils.Const.MpesaStaticStrings;
 import io.github.wmjuguna.daraja.utils.MpesaActions;
 import io.github.wmjuguna.daraja.utils.StringToDateConverter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.IOException;
 import java.text.ParseException;
+import java.util.List;
+import java.util.Map;
 
 @Service
 @Transactional
@@ -20,10 +24,12 @@ public class StkLogService implements StkLogOperations {
 
     private final StkLogRepository stkLogRepository;
     private final MpesaActions actions;
+    private final ObjectMapper objectMapper;
 
-    public StkLogService(StkLogRepository stkLogRepository, MpesaActions mpesaActions) {
+    public StkLogService(StkLogRepository stkLogRepository, MpesaActions mpesaActions, ObjectMapper objectMapper) {
         this.stkLogRepository = stkLogRepository;
         this.actions = mpesaActions;
+        this.objectMapper = objectMapper;
     }
 
     @Override
@@ -33,46 +39,108 @@ public class StkLogService implements StkLogOperations {
 
     @Override
     public StkLog retriveLog(String uid) {
-        return stkLogRepository.findByStkLogUid(uid);
+        return stkLogRepository.findByUuid(uid);
     }
 
     @Override
-    public StkLog updateLog(StkCallbackResponseDTO callback) {
-        StkLog stkLog = retriveByMerchantId(callback.body().stkCallback().merchantRequestID());
-        stkLog.setResultCode(callback.body().stkCallback().resultCode());
-        if (callback.body().stkCallback().resultCode() == 0) {
-            callback.body().stkCallback().callbackMetadata().item().forEach(
-                    item -> {
-                        switch (item.name()) {
-                            case MpesaStaticStrings.MPESA_RECEIPT_NO ->
-                                    stkLog.getMpesaPayment().setMpesaTransactionNo(item.value().toString());
-                            case MpesaStaticStrings.AMOUNT ->
-                                    stkLog.getMpesaPayment().setTransactionAmount((Double) item.value());
-                            case MpesaStaticStrings.TRANSACTION_DATE -> {
-                                try {
-                                    stkLog.getMpesaPayment().setTransactionTime(StringToDateConverter.parse(item.value().toString()));
-                                } catch (ParseException e) {
-                                    throw new RuntimeException(e);
-                                }
-                            }
-                            case MpesaStaticStrings.BALANCE -> {
-                            }
-                            default -> stkLog.getMpesaPayment().setPhoneNumber(item.value().toString());
-                        }
-                    }
+    public StkLog updateLog(StkCallbackResponseDTO callback, String rawPayload) {
+        String merchantRequestId = callback.body().stkCallback().merchantRequestID();
+        StkLog stkLog = retriveByMerchantId(merchantRequestId);
+        stkLog.setCallbackPayload(rawPayload);
+        Integer resultCode = callback.body().stkCallback().resultCode();
+        if (resultCode != null && resultCode == 0 && stkLog.getCallbackUrl() != null) {
+            ParsedCallbackData parsedData = parseCallbackData(rawPayload);
+            actions.callBackWithConfirmationOrFailure(
+                    parsedData.paymentReference,
+                    parsedData.amount,
+                    parsedData.receiptNo,
+                    stkLog.getCallbackUrl(),
+                    resultCode
             );
-            stkLog.getMpesaPayment().setTransactionStatus(true);
         }
-        ;
-        actions.callBackWithConfirmationOrFailure(stkLog.getMpesaPayment().getAccountNo(),
-                stkLog.getMpesaPayment().getTransactionAmount(),
-                stkLog.getMpesaPayment().getMpesaTransactionNo(),
-                stkLog.getCallbackUrl(), stkLog.getResultCode());
         return stkLogRepository.save(stkLog);
     }
 
     @Override
     public StkLog retriveByMerchantId(String merchantRequestId) {
-        return stkLogRepository.findByMerchantRequestID(merchantRequestId);
+        return stkLogRepository.findByMerchantRequestId(merchantRequestId);
+    }
+
+    private ParsedCallbackData parseCallbackData(String rawPayload) {
+        if (rawPayload == null || rawPayload.isBlank()) {
+            return ParsedCallbackData.empty();
+        }
+        try {
+            Map<String, Object> payload = objectMapper.readValue(rawPayload, new TypeReference<>() {});
+            Object body = payload.get("Body");
+            if (!(body instanceof Map<?, ?> bodyMap)) {
+                return ParsedCallbackData.empty();
+            }
+            Object stkCallback = bodyMap.get("stkCallback");
+            if (!(stkCallback instanceof Map<?, ?> stkCallbackMap)) {
+                return ParsedCallbackData.empty();
+            }
+            Object callbackMetadata = stkCallbackMap.get("CallbackMetadata");
+            if (!(callbackMetadata instanceof Map<?, ?> callbackMetadataMap)) {
+                return ParsedCallbackData.empty();
+            }
+            Object items = callbackMetadataMap.get("Item");
+            if (!(items instanceof List<?> itemList)) {
+                return ParsedCallbackData.empty();
+            }
+            double amount = 0.0;
+            String receiptNo = null;
+            String phoneNumber = null;
+            String transactionDate = null;
+            for (Object item : itemList) {
+                if (!(item instanceof Map<?, ?> itemMap)) {
+                    continue;
+                }
+                Object name = itemMap.get("Name");
+                Object value = itemMap.get("Value");
+                if (!(name instanceof String itemName)) {
+                    continue;
+                }
+                switch (itemName) {
+                    case "Amount" -> amount = parseDouble(value);
+                    case "MpesaReceiptNumber" -> receiptNo = value != null ? value.toString() : null;
+                    case "PhoneNumber" -> phoneNumber = value != null ? value.toString() : null;
+                    case "TransactionDate" -> transactionDate = value != null ? value.toString() : null;
+                    default -> {
+                    }
+                }
+            }
+            if (transactionDate != null) {
+                try {
+                    StringToDateConverter.parse(transactionDate);
+                } catch (ParseException e) {
+                    log.info("Failed to parse transaction date {}", transactionDate);
+                }
+            }
+            return new ParsedCallbackData(phoneNumber, amount, receiptNo);
+        } catch (IOException e) {
+            log.info("Failed to parse STK callback payload", e);
+            return ParsedCallbackData.empty();
+        }
+    }
+
+    private double parseDouble(Object value) {
+        if (value instanceof Number number) {
+            return number.doubleValue();
+        }
+        if (value == null) {
+            return 0.0;
+        }
+        try {
+            return Double.parseDouble(value.toString());
+        } catch (NumberFormatException e) {
+            return 0.0;
+        }
+    }
+
+    private record ParsedCallbackData(String paymentReference, double amount, String receiptNo) {
+        private static ParsedCallbackData empty() {
+            return new ParsedCallbackData(null, 0.0, null);
+        }
     }
 }

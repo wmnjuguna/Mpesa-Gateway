@@ -1,4 +1,4 @@
-package io.github.wmjuguna.daraja.utils.Const;
+package io.github.wmjuguna.daraja.utils;
 
 public class MpesaStaticStrings {
     public static final String MPESA_RECEIPT_NO = "MpesaReceiptNumber";

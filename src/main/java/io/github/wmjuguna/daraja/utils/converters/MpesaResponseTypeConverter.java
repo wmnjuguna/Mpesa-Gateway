@@ -1,6 +1,6 @@
 package io.github.wmjuguna.daraja.utils.converters;
 
-import io.github.wmjuguna.daraja.utils.Enums.MpesaResponseType;
+import io.github.wmjuguna.daraja.utils.MpesaResponseType;
 import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;
 

@@ -9,6 +9,6 @@ public interface MpesaPaymentOperations {
     StkLog requestPayment(ClaimSTKPayment stkPayment);
 
     @Transactional
-    void recordConfirmationPayment(MpesaConfirmationOrValidationResponse confirmationOrValidationResponse);
+    void recordConfirmationPayment(MpesaConfirmationOrValidationResponse confirmationOrValidationResponse, String rawPayload);
 
 }

@@ -31,7 +31,6 @@ public class PaybillConfigService {
                 paybillConfig.getConfirmationUrl(),
                 paybillConfig.getValidationUrl(),
                 paybillConfig.getPaybillNo(), paybillConfig.getResponseType().getResponse());
-        paybillConfig.setPaybillUid(UUID.randomUUID().toString());
         paybillConfig.setConsumerKey(Base64.getEncoder().encodeToString(paybillConfig.getConsumerKey()
                 .getBytes(StandardCharsets.UTF_8)));
         paybillConfig.setConsumerSecret(Base64.getEncoder().encodeToString(paybillConfig
@@ -45,7 +44,7 @@ public class PaybillConfigService {
 
     public PaybillConfig retrievePaybillConfiguration(String uid, String finder) {
         if (finder.equalsIgnoreCase("uid")) {
-            return this.paybillConfigRepository.findByPaybillUid(uid)
+            return this.paybillConfigRepository.findByUuid(uid)
                     .orElseThrow(() -> new ResourceNotFoundException("Paybill Could not be found"));
         } else {
             return this.paybillConfigRepository.findByPaybillNo(Integer.valueOf(uid))
@@ -55,7 +54,7 @@ public class PaybillConfigService {
 
     @Transactional
     public PaybillConfig update(PaybillConfig paybillConfig) {
-        return this.paybillConfigRepository.findByPaybillUid(paybillConfig.getPaybillUid())
+        return this.paybillConfigRepository.findByUuid(paybillConfig.getUuid())
                 .map(paybillConfig1 -> {
                     paybillConfig1.setConfirmationUrl(Base64.getEncoder().encodeToString(paybillConfig.getConfirmationUrl().getBytes(StandardCharsets.UTF_8)));
                     paybillConfig1.setValidationUrl(Base64.getEncoder().encodeToString(paybillConfig.getValidationUrl().getBytes(StandardCharsets.UTF_8)));

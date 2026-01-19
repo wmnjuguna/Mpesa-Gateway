@@ -9,7 +9,7 @@ import io.github.wmjuguna.daraja.dtos.Responses.URLRegistrationResponseDTO;
 import io.github.wmjuguna.daraja.dtos.URLRegistrationRequestDTO;
 import io.github.wmjuguna.daraja.exceptions.AuthenticationFailed;
 import io.github.wmjuguna.daraja.exceptions.StkPushFailed;
-import io.github.wmjuguna.daraja.utils.Const.MpesaStaticStrings;
+import io.github.wmjuguna.daraja.utils.MpesaStaticStrings;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;

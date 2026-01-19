@@ -1,9 +1,11 @@
 package io.github.wmjuguna.daraja.dtos;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import java.util.Date;
 
 public record MpesaPayment(
+    @JsonProperty("uuid")
+    String uuid,
+
     @JsonProperty("receiptNo")
     String receiptNo,
 
@@ -14,5 +16,5 @@ public record MpesaPayment(
     String accountNo,
 
     @JsonProperty("tranTime")
-    Date tranTime
+    String tranTime
 ) {}

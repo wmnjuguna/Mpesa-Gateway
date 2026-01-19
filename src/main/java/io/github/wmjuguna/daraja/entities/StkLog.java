@@ -1,35 +1,30 @@
 package io.github.wmjuguna.daraja.entities;
 
-import jakarta.persistence.*;
-import lombok.*;
-import org.hibernate.annotations.UuidGenerator;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Builder
-@AllArgsConstructor @NoArgsConstructor
+@AllArgsConstructor
+@NoArgsConstructor
 @Entity
 @Table(name = "stk_log")
-@Getter @Setter
-public class StkLog {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-    @UuidGenerator
-    @Column(name = "uuid")
-    private String stkLogUid;
-    @Column(name = "merchant_request_id")
-    private String merchantRequestID;
-    @Column(name = "customer_message")
-    private String customerMessage;
-    @Column(name = "checkout_request_id")
-    private String checkoutRequestID;
-    @Column(name = "response_description")
-    private String responseDescription;
-    @Column(name = "response_code")
-    private Integer responseCode;
-    @Column(name = "result_code")
-    private Integer resultCode;
-    @Column(name = "mpesa_receipt_no")
-    private String mpesaReceiptNo;
+@Getter
+@Setter
+public class StkLog extends BaseEntity {
+    @Column(name = "callback_payload", columnDefinition = "jsonb")
+    private String callbackPayload;
+    @Column(name = "request_payload", columnDefinition = "jsonb")
+    private String requestPayload;
     @Column(name = "callback_url")
     private String callbackUrl;
     @Column(name = "mpesa_payment_uuid")

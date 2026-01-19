@@ -1,4 +1,4 @@
-package io.github.wmjuguna.daraja.utils.Enums;
+package io.github.wmjuguna.daraja.utils;
 
 public enum DebitCreditEnum {
     CREDIT("CR"),
