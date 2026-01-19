@@ -7,13 +7,11 @@ import jakarta.persistence.Id;
 import jakarta.persistence.MappedSuperclass;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
-import jakarta.persistence.Temporal;
-import jakarta.persistence.TemporalType;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.UuidGenerator;
 
-import java.util.Date;
+import java.time.Instant;
 
 @MappedSuperclass
 @Getter
@@ -28,22 +26,20 @@ public abstract class BaseEntity {
     private String uuid;
 
     @Column(name = "created_at", nullable = false)
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date createdAt;
+    private Instant createdAt;
 
     @Column(name = "updated_at", nullable = false)
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date updatedAt;
+    private Instant updatedAt;
 
     @PrePersist
     protected void onCreate() {
-        Date now = new Date();
+        Instant now = Instant.now();
         createdAt = now;
         updatedAt = now;
     }
 
     @PreUpdate
     protected void onUpdate() {
-        updatedAt = new Date();
+        updatedAt = Instant.now();
     }
 }

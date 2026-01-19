@@ -12,6 +12,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 @Builder
 @NoArgsConstructor
@@ -21,7 +23,8 @@ import lombok.Setter;
 @Getter
 @Setter
 public class MpesaPayment extends BaseEntity {
-    @Column(name = "confirmation_payload", columnDefinition = "jsonb")
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "confirmation_payload")
     private String confirmationPayload;
     @Column(name = "stk_log_uuid")
     private String stkLogUuid;

@@ -7,6 +7,8 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 @Entity
 @Table(name = "mpesa_validation_log")
@@ -15,6 +17,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class MpesaValidationLog extends BaseEntity {
-    @Column(name = "validation_payload", columnDefinition = "jsonb")
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "validation_payload")
     private String validationPayload;
 }

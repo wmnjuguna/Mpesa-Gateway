@@ -12,6 +12,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 @Builder
 @AllArgsConstructor
@@ -21,9 +23,11 @@ import lombok.Setter;
 @Getter
 @Setter
 public class StkLog extends BaseEntity {
-    @Column(name = "callback_payload", columnDefinition = "jsonb")
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "callback_payload")
     private String callbackPayload;
-    @Column(name = "request_payload", columnDefinition = "jsonb")
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "request_payload")
     private String requestPayload;
     @Column(name = "callback_url")
     private String callbackUrl;
