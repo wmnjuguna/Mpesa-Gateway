@@ -10,6 +10,7 @@ import io.github.wmjuguna.daraja.exceptions.AuthenticationFailed;
 import io.github.wmjuguna.daraja.exceptions.StkPushFailed;
 import io.github.wmjuguna.daraja.integrations.DarajaApiClient;
 import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
@@ -20,14 +21,10 @@ import java.util.Base64;
 import java.util.Objects;
 
 @Component
+@RequiredArgsConstructor
 public class MpesaActions {
     private final DarajaApiClient darajaApiClient;
-    private final RestClient restClient;
-
-    public MpesaActions(DarajaApiClient darajaApiClient, RestClient.Builder restClientBuilder) {
-        this.darajaApiClient = darajaApiClient;
-        this.restClient = restClientBuilder.build();
-    }
+    private final RestClient.Builder restClientBuilder;
 
 
     public AuthorizationResponse authenticate(String consumerSecret, String consumerKey) {
@@ -88,7 +85,8 @@ public class MpesaActions {
                     MpesaStaticStrings.PAYMENT_SUCCESSFUL,
                     null
             );
-            restClient.post()
+            restClientBuilder.build()
+                    .post()
                     .uri(callbackUrl)
                     .contentType(MediaType.APPLICATION_JSON)
                     .accept(MediaType.APPLICATION_JSON)
@@ -98,7 +96,8 @@ public class MpesaActions {
         }
         else {
             ResponseTemplate<?> requestPayload = new ResponseTemplate<>(null, null, MpesaStaticStrings.PAYMENT_UNSUCCESSFUL);
-            restClient.post()
+            restClientBuilder.build()
+                    .post()
                     .uri(callbackUrl)
                     .contentType(MediaType.APPLICATION_JSON)
                     .accept(MediaType.APPLICATION_JSON)

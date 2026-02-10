@@ -25,6 +25,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -35,7 +36,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @CrossOrigin
-@RestController @Slf4j
+@RestController
+@Slf4j
+@RequiredArgsConstructor
 @RequestMapping("mobile")
 @Tag(name = "M-Pesa Payment Gateway", description = "Comprehensive M-Pesa payment processing APIs for STK Push, callbacks, confirmations, and merchant configuration")
 public class PaymentsResource {
@@ -44,14 +47,6 @@ public class PaymentsResource {
     private final PaybillConfigService paybillConfigService;
     private final StkLogService stkLogService;
     private final ObjectMapper objectMapper;
-
-    public PaymentsResource(MpesaPaymentService mpesaPaymentService, PaybillConfigService paybillConfigService,
-                            StkLogService stkLogService, ObjectMapper objectMapper) {
-        this.paybillConfigService = paybillConfigService;
-        this.mpesaPaymentService = mpesaPaymentService;
-        this.stkLogService = stkLogService;
-        this.objectMapper = objectMapper;
-    }
 
     @PostMapping("request-payment")
     @Operation(

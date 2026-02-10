@@ -8,6 +8,7 @@ import io.github.wmjuguna.daraja.repositories.StkLogOperations;
 import io.github.wmjuguna.daraja.repositories.StkLogRepository;
 import io.github.wmjuguna.daraja.utils.MpesaActions;
 import io.github.wmjuguna.daraja.utils.StringToDateConverter;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,17 +21,12 @@ import java.util.Map;
 @Service
 @Transactional
 @Slf4j
+@RequiredArgsConstructor
 public class StkLogService implements StkLogOperations {
 
     private final StkLogRepository stkLogRepository;
     private final MpesaActions actions;
     private final ObjectMapper objectMapper;
-
-    public StkLogService(StkLogRepository stkLogRepository, MpesaActions mpesaActions, ObjectMapper objectMapper) {
-        this.stkLogRepository = stkLogRepository;
-        this.actions = mpesaActions;
-        this.objectMapper = objectMapper;
-    }
 
     @Override
     public StkLog createLog(StkLog log) {

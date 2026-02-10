@@ -4,6 +4,7 @@ import io.github.wmjuguna.daraja.entities.PaybillConfig;
 import io.github.wmjuguna.daraja.exceptions.ResourceNotFoundException;
 import io.github.wmjuguna.daraja.repositories.PaybillConfigRepository;
 import io.github.wmjuguna.daraja.utils.MpesaActions;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -15,15 +16,11 @@ import java.util.List;
 import java.util.UUID;
 
 @Service
+@RequiredArgsConstructor
 public class PaybillConfigService {
 
     private final PaybillConfigRepository paybillConfigRepository;
     private final MpesaActions mpesaActions;
-
-    public PaybillConfigService(PaybillConfigRepository paybillConfigRepository, MpesaActions mpesaActions) {
-        this.paybillConfigRepository = paybillConfigRepository;
-        this.mpesaActions = mpesaActions;
-    }
 
     @Transactional
     public PaybillConfig createPaybillConfiguration(PaybillConfig paybillConfig) {
