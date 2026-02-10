@@ -1,3 +1,15 @@
+# [1.3.0](https://github.com/wmnjuguna/Mpesa-Gateway/compare/v1.2.3...v1.3.0) (2026-02-10)
+
+
+### Bug Fixes
+
+* update app bootstrap http services import ([f6c1adf](https://github.com/wmnjuguna/Mpesa-Gateway/commit/f6c1adf5e9310085b2ffc7869a1496faa8a8d107))
+
+
+### Features
+
+* configure keycloak oauth2 resource server ([2271a43](https://github.com/wmnjuguna/Mpesa-Gateway/commit/2271a43febc9f3ec418990b77ef1c326774d5787))
+
 ## [1.2.3](https://github.com/wmnjuguna/Mpesa-Gateway/compare/v1.2.2...v1.2.3) (2026-02-10)
 
 
