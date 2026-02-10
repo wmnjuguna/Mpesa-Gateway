@@ -5,15 +5,12 @@ import java.net.URI;
 import java.util.List;
 import java.util.Set;
 
-import com.google.crypto.tink.signature.SignatureConfig;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.jwk.source.JWKSourceBuilder;
 import com.nimbusds.jose.proc.JWSVerificationKeySelector;
 import com.nimbusds.jose.proc.SecurityContext;
 import com.nimbusds.jwt.proc.DefaultJWTProcessor;
-import jakarta.annotation.PostConstruct;
-import java.security.GeneralSecurityException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -34,12 +31,6 @@ import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
 public class SecurityConfig {
-
-    @PostConstruct
-    public void initTink() throws GeneralSecurityException {
-        // Register Tink signature primitives for EdDSA support
-        SignatureConfig.register();
-    }
 
     private static final String[] PUBLIC_ENDPOINTS = {
             "/mobile/stk",
@@ -81,9 +72,22 @@ public class SecurityConfig {
                 .create(URI.create(jwkSetUri).toURL())
                 .build();
 
-        // Configure processor to accept both RS256 and EdDSA algorithms
+        // Explicitly allow asymmetric signature algorithms including EdDSA (OKP keys).
         JWSVerificationKeySelector<SecurityContext> keySelector = new JWSVerificationKeySelector<>(
-                Set.of(JWSAlgorithm.RS256, JWSAlgorithm.EdDSA),
+                Set.of(
+                        JWSAlgorithm.RS256,
+                        JWSAlgorithm.RS384,
+                        JWSAlgorithm.RS512,
+                        JWSAlgorithm.PS256,
+                        JWSAlgorithm.PS384,
+                        JWSAlgorithm.PS512,
+                        JWSAlgorithm.ES256,
+                        JWSAlgorithm.ES384,
+                        JWSAlgorithm.ES512,
+                        JWSAlgorithm.EdDSA,
+                        JWSAlgorithm.Ed25519,
+                        JWSAlgorithm.Ed448
+                ),
                 jwkSource
         );
 
