@@ -1,3 +1,10 @@
+## [1.5.4](https://github.com/wmnjuguna/Mpesa-Gateway/compare/v1.5.3...v1.5.4) (2026-02-10)
+
+
+### Bug Fixes
+
+* add deeper JWT and JWKS diagnostics for EdDSA failures ([2a2e977](https://github.com/wmnjuguna/Mpesa-Gateway/commit/2a2e9777ba08402f4d41f7773b2c44aead3cda73))
+
 ## [1.5.3](https://github.com/wmnjuguna/Mpesa-Gateway/compare/v1.5.2...v1.5.3) (2026-02-10)
 
 
