@@ -55,12 +55,9 @@ public class OpenApiConfig {
                 .servers(List.of(
                         new Server()
                                 .url("http://localhost:30005")
-                                .description("Development Server"),
+                                .description("Local Server"),
                         new Server()
-                                .url("https://api-staging.daraja.io")
-                                .description("Staging Server"),
-                        new Server()
-                                .url("https://api.daraja.io")
+                                .url("https://cheddar.sarafrika.com")
                                 .description("Production Server")))
                 .tags(List.of(
                         new Tag()
