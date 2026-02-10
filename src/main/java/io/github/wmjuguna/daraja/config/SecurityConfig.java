@@ -3,13 +3,19 @@ package io.github.wmjuguna.daraja.config;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.text.ParseException;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
+import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.jwk.JWK;
 import com.nimbusds.jose.jwk.JWKSet;
+import com.nimbusds.jose.jwk.OctetKeyPair;
+import com.nimbusds.jose.crypto.Ed25519Verifier;
 import com.nimbusds.jwt.SignedJWT;
+import com.nimbusds.jwt.JWTClaimsSet;
 import lombok.extern.slf4j.Slf4j;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.jwk.source.JWKSource;
@@ -29,6 +35,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.oauth2.core.OAuth2Error;
 import org.springframework.security.oauth2.core.OAuth2TokenValidator;
 import org.springframework.security.oauth2.core.OAuth2TokenValidatorResult;
+import org.springframework.security.oauth2.jwt.BadJwtException;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtException;
@@ -119,10 +126,11 @@ public class SecurityConfig {
             );
             return OAuth2TokenValidatorResult.failure(error);
         };
-        jwtDecoder.setJwtValidator(new DelegatingOAuth2TokenValidator<>(
+        OAuth2TokenValidator<Jwt> jwtValidator = new DelegatingOAuth2TokenValidator<>(
                 withIssuer,
                 withAudience
-        ));
+        );
+        jwtDecoder.setJwtValidator(jwtValidator);
         return token -> {
             try {
                 Jwt jwt = jwtDecoder.decode(token);
@@ -139,10 +147,98 @@ public class SecurityConfig {
                 }
                 return jwt;
             } catch (JwtException ex) {
+                try {
+                    Jwt fallbackJwt = tryDecodeEdDsaToken(token, jwkSetUri, jwtValidator);
+                    if (fallbackJwt != null) {
+                        return fallbackJwt;
+                    }
+                } catch (JwtException fallbackException) {
+                    logJwtDecodeFailure(token, fallbackException, jwkSetUri);
+                    throw fallbackException;
+                }
                 logJwtDecodeFailure(token, ex, jwkSetUri);
                 throw ex;
             }
         };
+    }
+
+    private Jwt tryDecodeEdDsaToken(String token, String jwkSetUri, OAuth2TokenValidator<Jwt> jwtValidator) {
+        if (token == null || token.isBlank()) {
+            return null;
+        }
+
+        SignedJWT signedJwt;
+        try {
+            signedJwt = SignedJWT.parse(token);
+        } catch (ParseException ex) {
+            return null;
+        }
+
+        JWSAlgorithm algorithm = signedJwt.getHeader().getAlgorithm();
+        if (algorithm == null || !(JWSAlgorithm.EdDSA.equals(algorithm) || JWSAlgorithm.Ed25519.equals(algorithm))) {
+            return null;
+        }
+
+        String kid = signedJwt.getHeader().getKeyID();
+        if (kid == null || kid.isBlank()) {
+            throw new BadJwtException("EdDSA token is missing kid header");
+        }
+
+        try {
+            JWKSet jwkSet = JWKSet.load(URI.create(jwkSetUri).toURL());
+            JWK jwk = jwkSet.getKeys()
+                    .stream()
+                    .filter(key -> Objects.equals(key.getKeyID(), kid))
+                    .findFirst()
+                    .orElseThrow(() -> new BadJwtException("No JWK found for kid: " + kid));
+
+            if (!(jwk instanceof OctetKeyPair octetKeyPair)) {
+                throw new BadJwtException("JWK for kid " + kid + " is not an OKP key");
+            }
+
+            boolean signatureValid = signedJwt.verify(new Ed25519Verifier(octetKeyPair.toPublicJWK()));
+            if (!signatureValid) {
+                throw new BadJwtException("EdDSA signature verification failed for kid: " + kid);
+            }
+
+            Jwt jwt = toSpringJwt(token, signedJwt);
+            OAuth2TokenValidatorResult validationResult = jwtValidator.validate(jwt);
+            if (validationResult.hasErrors()) {
+                OAuth2Error firstError = validationResult.getErrors().iterator().next();
+                String description = firstError.getDescription() != null ? firstError.getDescription() : firstError.getErrorCode();
+                throw new BadJwtException(description);
+            }
+
+            log.warn("JWT decoded through EdDSA fallback verifier: alg='{}', kid='{}'", algorithm, kid);
+            return jwt;
+        } catch (BadJwtException ex) {
+            throw ex;
+        } catch (JOSEException | ParseException ex) {
+            throw new BadJwtException("EdDSA verification failed: " + ex.getMessage(), ex);
+        } catch (Exception ex) {
+            throw new BadJwtException("EdDSA key resolution failed: " + ex.getMessage(), ex);
+        }
+    }
+
+    private Jwt toSpringJwt(String token, SignedJWT signedJwt) throws ParseException {
+        JWTClaimsSet claimsSet = signedJwt.getJWTClaimsSet();
+        Map<String, Object> headers = new LinkedHashMap<>(signedJwt.getHeader().toJSONObject());
+        Map<String, Object> claims = new LinkedHashMap<>(claimsSet.getClaims());
+
+        Jwt.Builder jwtBuilder = Jwt.withTokenValue(token)
+                .headers(h -> h.putAll(headers))
+                .claims(c -> c.putAll(claims));
+
+        if (claimsSet.getIssueTime() != null) {
+            jwtBuilder.issuedAt(claimsSet.getIssueTime().toInstant());
+        }
+        if (claimsSet.getNotBeforeTime() != null) {
+            jwtBuilder.notBefore(claimsSet.getNotBeforeTime().toInstant());
+        }
+        if (claimsSet.getExpirationTime() != null) {
+            jwtBuilder.expiresAt(claimsSet.getExpirationTime().toInstant());
+        }
+        return jwtBuilder.build();
     }
 
     private void logJwtDecodeFailure(String token, JwtException ex, String jwkSetUri) {
