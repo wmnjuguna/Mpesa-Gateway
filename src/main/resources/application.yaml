@@ -30,6 +30,16 @@ spring:
         default-page-size: 10
 
   time-zone: Africa/Nairobi
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${KEYCLOAK_ISSUER_URI:http://localhost:8080/realms/mpesa}
+          jwk-set-uri: ${KEYCLOAK_JWK_SET_URI:${KEYCLOAK_ISSUER_URI:http://localhost:8080/realms/mpesa}/protocol/openid-connect/certs}
+
+security:
+  oauth2:
+    required-audience: ${KEYCLOAK_RESOURCE_CLIENT_ID:mpesa-gateway-api}
 
 payments:
   mpesa:

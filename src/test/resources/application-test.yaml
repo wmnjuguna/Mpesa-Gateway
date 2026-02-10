@@ -30,6 +30,16 @@ spring:
         default-page-size: 10
 
   time-zone: Africa/Nairobi
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: https://sso.test.local/realms/daraja
+          jwk-set-uri: https://sso.test.local/realms/daraja/protocol/openid-connect/certs
+
+security:
+  oauth2:
+    required-audience: daraja-api
 
 payments:
   mpesa:
