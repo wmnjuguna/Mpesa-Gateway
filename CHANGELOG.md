@@ -1,3 +1,10 @@
+## [1.5.3](https://github.com/wmnjuguna/Mpesa-Gateway/compare/v1.5.2...v1.5.3) (2026-02-10)
+
+
+### Bug Fixes
+
+* add JWT decode diagnostics for production troubleshooting ([25044ff](https://github.com/wmnjuguna/Mpesa-Gateway/commit/25044ffac7de3ee5216a01dcc70fdb4bc271d0c1))
+
 ## [1.5.2](https://github.com/wmnjuguna/Mpesa-Gateway/compare/v1.5.1...v1.5.2) (2026-02-10)
 
 

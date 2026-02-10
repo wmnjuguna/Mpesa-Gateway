@@ -10,7 +10,7 @@
     </parent>
     <groupId>io.github.wmjuguna</groupId>
     <artifactId>daraja</artifactId>
-    <version>1.5.2</version>
+    <version>1.5.3</version>
     <name>daraja</name>
     <description>Daraja M-Pesa Gateway Service</description>
     <properties>
