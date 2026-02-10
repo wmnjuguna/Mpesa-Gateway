@@ -1,4 +1,4 @@
-uuid -- Create merchant_config table (renamed from paybill_config for universal naming)
+-- Create merchant_config table (renamed from paybill_config for universal naming)
 CREATE TABLE merchant_config (
     id BIGSERIAL PRIMARY KEY,
     uuid VARCHAR(36) NOT NULL UNIQUE,
