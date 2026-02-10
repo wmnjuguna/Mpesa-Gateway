@@ -1,3 +1,10 @@
+## [1.2.3](https://github.com/wmnjuguna/Mpesa-Gateway/compare/v1.2.2...v1.2.3) (2026-02-10)
+
+
+### Bug Fixes
+
+* enable flyway migration startup and tag docker from semantic tags ([702f3bd](https://github.com/wmnjuguna/Mpesa-Gateway/commit/702f3bd8174a2b615b8287db0dee9073d4090391))
+
 ## [1.2.2](https://github.com/wmnjuguna/Mpesa-Gateway/compare/v1.2.1...v1.2.2) (2026-02-10)
 
 
