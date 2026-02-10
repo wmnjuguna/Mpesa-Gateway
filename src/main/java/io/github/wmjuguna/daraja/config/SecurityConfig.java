@@ -2,9 +2,12 @@ package io.github.wmjuguna.daraja.config;
 
 import java.net.MalformedURLException;
 import java.net.URI;
+import java.text.ParseException;
 import java.util.List;
 import java.util.Set;
 
+import com.nimbusds.jwt.SignedJWT;
+import lombok.extern.slf4j.Slf4j;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.jwk.source.JWKSourceBuilder;
@@ -25,10 +28,12 @@ import org.springframework.security.oauth2.core.OAuth2TokenValidator;
 import org.springframework.security.oauth2.core.OAuth2TokenValidatorResult;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
+import org.springframework.security.oauth2.jwt.JwtException;
 import org.springframework.security.oauth2.jwt.JwtValidators;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.web.SecurityFilterChain;
 
+@Slf4j
 @Configuration
 public class SecurityConfig {
 
@@ -115,6 +120,61 @@ public class SecurityConfig {
                 withIssuer,
                 withAudience
         ));
-        return jwtDecoder;
+        return token -> {
+            try {
+                Jwt jwt = jwtDecoder.decode(token);
+                if (log.isDebugEnabled()) {
+                    log.debug(
+                            "JWT accepted: alg={}, kid={}, iss={}, aud={}, exp={}, tokenLength={}",
+                            jwt.getHeaders().get("alg"),
+                            jwt.getHeaders().get("kid"),
+                            jwt.getIssuer(),
+                            jwt.getAudience(),
+                            jwt.getExpiresAt(),
+                            token != null ? token.length() : 0
+                    );
+                }
+                return jwt;
+            } catch (JwtException ex) {
+                logJwtDecodeFailure(token, ex);
+                throw ex;
+            }
+        };
+    }
+
+    private void logJwtDecodeFailure(String token, JwtException ex) {
+        int tokenLength = token != null ? token.length() : 0;
+        int tokenSegments = token == null || token.isBlank() ? 0 : token.split("\\.", -1).length;
+        if (token == null || token.isBlank()) {
+            log.error(
+                    "JWT decode failed: message='{}', tokenMissing=true, tokenLength={}, tokenSegments={}",
+                    ex.getMessage(),
+                    tokenLength,
+                    tokenSegments
+            );
+            return;
+        }
+
+        try {
+            SignedJWT signedJwt = SignedJWT.parse(token);
+            log.error(
+                    "JWT decode failed: message='{}', alg='{}', kid='{}', iss='{}', aud='{}', tokenLength={}, tokenSegments={}",
+                    ex.getMessage(),
+                    signedJwt.getHeader().getAlgorithm(),
+                    signedJwt.getHeader().getKeyID(),
+                    signedJwt.getJWTClaimsSet().getIssuer(),
+                    signedJwt.getJWTClaimsSet().getAudience(),
+                    tokenLength,
+                    tokenSegments
+            );
+        } catch (ParseException parseException) {
+            log.error(
+                    "JWT decode failed: message='{}', parseError='{}', tokenLength={}, tokenSegments={}",
+                    ex.getMessage(),
+                    parseException.getMessage(),
+                    tokenLength,
+                    tokenSegments
+            );
+        }
     }
 }
