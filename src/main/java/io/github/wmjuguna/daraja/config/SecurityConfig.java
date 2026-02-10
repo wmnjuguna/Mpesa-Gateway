@@ -1,7 +1,16 @@
 package io.github.wmjuguna.daraja.config;
 
+import java.net.MalformedURLException;
+import java.net.URI;
 import java.util.List;
+import java.util.Set;
 
+import com.nimbusds.jose.JWSAlgorithm;
+import com.nimbusds.jose.jwk.source.JWKSource;
+import com.nimbusds.jose.jwk.source.JWKSourceBuilder;
+import com.nimbusds.jose.proc.JWSVerificationKeySelector;
+import com.nimbusds.jose.proc.SecurityContext;
+import com.nimbusds.jwt.proc.DefaultJWTProcessor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -53,11 +62,29 @@ public class SecurityConfig {
             @Value("${spring.security.oauth2.resourceserver.jwt.issuer-uri}") String issuerUri,
             @Value("${spring.security.oauth2.resourceserver.jwt.jwk-set-uri}") String jwkSetUri,
             @Value("${security.oauth2.required-audience}") String requiredAudience
-    ) {
+    ) throws MalformedURLException {
         if (requiredAudience == null || requiredAudience.isBlank()) {
             throw new IllegalStateException("security.oauth2.required-audience must be configured");
         }
-        NimbusJwtDecoder jwtDecoder = NimbusJwtDecoder.withJwkSetUri(jwkSetUri).build();
+
+        // Create JWK source from Keycloak's JWKS endpoint with caching
+        JWKSource<SecurityContext> jwkSource = JWKSourceBuilder
+                .create(URI.create(jwkSetUri).toURL())
+                .build();
+
+        // Configure processor to accept both RS256 and EdDSA algorithms
+        JWSVerificationKeySelector<SecurityContext> keySelector = new JWSVerificationKeySelector<>(
+                Set.of(JWSAlgorithm.RS256, JWSAlgorithm.EdDSA),
+                jwkSource
+        );
+
+        DefaultJWTProcessor<SecurityContext> jwtProcessor = new DefaultJWTProcessor<>();
+        jwtProcessor.setJWSKeySelector(keySelector);
+
+        // Build decoder with custom processor
+        NimbusJwtDecoder jwtDecoder = new NimbusJwtDecoder(jwtProcessor);
+
+        // Add validators for issuer and audience
         OAuth2TokenValidator<Jwt> withIssuer = JwtValidators.createDefaultWithIssuer(issuerUri);
         OAuth2TokenValidator<Jwt> withAudience = token -> {
             List<String> audience = token.getAudience();

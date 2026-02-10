@@ -46,6 +46,11 @@
             <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
             <version>3.0.1</version>
         </dependency>
+        <dependency>
+            <groupId>com.google.crypto.tink</groupId>
+            <artifactId>tink</artifactId>
+            <version>1.16.0</version>
+        </dependency>
 
         <dependency>
             <groupId>org.postgresql</groupId>
