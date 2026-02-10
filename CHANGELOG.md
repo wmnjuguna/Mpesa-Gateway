@@ -1,3 +1,10 @@
+# [1.4.0](https://github.com/wmnjuguna/Mpesa-Gateway/compare/v1.3.1...v1.4.0) (2026-02-10)
+
+
+### Features
+
+* **security:** enforce audience and enable OIDC-only swagger auth ([d66a1d8](https://github.com/wmnjuguna/Mpesa-Gateway/commit/d66a1d83b436c7503fad99fd1c7b0c04da8bbbce))
+
 ## [1.3.1](https://github.com/wmnjuguna/Mpesa-Gateway/compare/v1.3.0...v1.3.1) (2026-02-10)
 
 
