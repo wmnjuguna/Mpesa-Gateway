@@ -1,3 +1,10 @@
+## [1.3.1](https://github.com/wmnjuguna/Mpesa-Gateway/compare/v1.3.0...v1.3.1) (2026-02-10)
+
+
+### Bug Fixes
+
+* add Boot 4 restclient starter and client timeouts ([0493dd1](https://github.com/wmnjuguna/Mpesa-Gateway/commit/0493dd1a3894fdcd34abdd9e5e969bf853b5fcf7))
+
 # [1.3.0](https://github.com/wmnjuguna/Mpesa-Gateway/compare/v1.2.3...v1.3.0) (2026-02-10)
 
 
