@@ -1,3 +1,10 @@
+# [1.6.0](https://github.com/wmnjuguna/Mpesa-Gateway/compare/v1.5.5...v1.6.0) (2026-02-10)
+
+
+### Features
+
+* make paybill configuration registration async with retry status ([3361533](https://github.com/wmnjuguna/Mpesa-Gateway/commit/3361533a4cbbbbcdd347aa44f9b7c75e2ef1f28e))
+
 ## [1.5.5](https://github.com/wmnjuguna/Mpesa-Gateway/compare/v1.5.4...v1.5.5) (2026-02-10)
 
 
