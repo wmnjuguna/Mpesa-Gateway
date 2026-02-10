@@ -1,3 +1,10 @@
+## [1.2.2](https://github.com/wmnjuguna/Mpesa-Gateway/compare/v1.2.1...v1.2.2) (2026-02-10)
+
+
+### Bug Fixes
+
+* use spring-boot-starter-flyway for boot 4 ([229d974](https://github.com/wmnjuguna/Mpesa-Gateway/commit/229d97444fab454d1ac54710f280105d5fb4401e))
+
 ## [1.2.1](https://github.com/wmnjuguna/Mpesa-Gateway/compare/v1.2.0...v1.2.1) (2026-01-19)
 
 
