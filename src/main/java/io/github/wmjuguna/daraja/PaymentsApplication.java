@@ -1,16 +1,19 @@
 package io.github.wmjuguna.daraja;
 
-import io.github.wmjuguna.daraja.integrations.DarajaApiClient;
-import org.springframework.boot.SpringApplication;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
+import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.web.service.registry.ImportHttpServices;
 
+import io.github.wmjuguna.daraja.integrations.DarajaApiClient;
+
 @SpringBootApplication
+@EnableAsync
 @EnableScheduling
 @ImportHttpServices(group = "daraja", types = DarajaApiClient.class)
 public class PaymentsApplication {

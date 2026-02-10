@@ -1,23 +1,11 @@
 package io.github.wmjuguna.daraja.controllers;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import io.github.wmjuguna.daraja.dtos.ClaimSTKPayment;
-import io.github.wmjuguna.daraja.dtos.PaybillConfigRequest;
-import io.github.wmjuguna.daraja.dtos.PaybillConfigResponse;
-import io.github.wmjuguna.daraja.dtos.ResponseTemplate;
-import io.github.wmjuguna.daraja.dtos.Responses.MpesaConfirmationOrValidationResponse;
-import io.github.wmjuguna.daraja.dtos.Responses.StkCallbackResponseDTO;
-import io.github.wmjuguna.daraja.dtos.StkLogResponse;
-import io.github.wmjuguna.daraja.dtos.ValidationResponse;
-import io.github.wmjuguna.daraja.entities.PaybillConfig;
-import io.github.wmjuguna.daraja.entities.StkLog;
-import io.github.wmjuguna.daraja.services.PaybillConfigService;
-import io.github.wmjuguna.daraja.services.MpesaPaymentService;
-import io.github.wmjuguna.daraja.services.StkLogService;
-import io.github.wmjuguna.daraja.utils.MpesaResponseType;
-import io.swagger.v3.oas.annotations.Operation;
-
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.List;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
@@ -33,6 +21,22 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import io.github.wmjuguna.daraja.dtos.ClaimSTKPayment;
+import io.github.wmjuguna.daraja.dtos.PaybillConfigRequest;
+import io.github.wmjuguna.daraja.dtos.PaybillConfigResponse;
+import io.github.wmjuguna.daraja.dtos.ResponseTemplate;
+import io.github.wmjuguna.daraja.dtos.Responses.MpesaConfirmationOrValidationResponse;
+import io.github.wmjuguna.daraja.dtos.Responses.StkCallbackResponseDTO;
+import io.github.wmjuguna.daraja.dtos.StkLogResponse;
+import io.github.wmjuguna.daraja.dtos.ValidationResponse;
+import io.github.wmjuguna.daraja.entities.PaybillConfig;
+import io.github.wmjuguna.daraja.entities.StkLog;
+import io.github.wmjuguna.daraja.services.MpesaPaymentService;
+import io.github.wmjuguna.daraja.services.PaybillConfigService;
+import io.github.wmjuguna.daraja.services.StkLogService;
+import io.github.wmjuguna.daraja.utils.MpesaResponseType;
+import io.github.wmjuguna.daraja.utils.PaybillRegistrationStatus;
 
 @CrossOrigin
 @RestController
@@ -320,7 +324,7 @@ public class PaymentsResource {
     @PostMapping("configure-paybill")
     @Operation(
             summary = "Create Paybill Configuration",
-            description = "Creates a new merchant paybill configuration for M-Pesa integration. This stores merchant credentials and settings.",
+            description = "Creates a new merchant paybill configuration for M-Pesa integration. Data is stored immediately and Daraja URL registration is executed asynchronously.",
             tags = {"Configuration Management"}
     )
     @ApiResponses(value = {
@@ -341,9 +345,11 @@ public class PaymentsResource {
                                                 "confirmation_url": "https://yourdomain.com/confirm",
                                                 "validation_url": "https://yourdomain.com/validate",
                                                 "stk_callback_url": "https://yourdomain.com/mobile/stk",
-                                                "response_type": "Completed"
+                                                "response_type": "Completed",
+                                                "registration_status": "PENDING",
+                                                "registration_failure_reason": null
                                               },
-                                              "message": "Configuration created successfully",
+                                              "message": "Configuration saved. Daraja registration in progress.",
                                               "error": null
                                             }
                                             """
@@ -381,10 +387,17 @@ public class PaymentsResource {
                     )
             )
             @RequestBody PaybillConfigRequest paybillConfig) {
-        PaybillConfig createdConfig = paybillConfigService.createPaybillConfiguration(toPaybillEntity(paybillConfig));
+        PaybillConfig createdConfig;
+        try {
+            createdConfig = paybillConfigService.createPaybillConfiguration(toPaybillEntity(paybillConfig));
+        } catch (IllegalArgumentException ex) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                    new ResponseTemplate<>(null, null, ex.getMessage())
+            );
+        }
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(
-                        new ResponseTemplate<>(toPaybillResponse(createdConfig), "Configuration created successfully", null)
+                        new ResponseTemplate<>(toPaybillResponse(createdConfig), "Configuration saved. Daraja registration in progress.", null)
                 );
     }
 
@@ -413,7 +426,9 @@ public class PaymentsResource {
                                                   "confirmation_url": "https://yourdomain.com/confirm",
                                                   "validation_url": "https://yourdomain.com/validate",
                                                   "stk_callback_url": "https://yourdomain.com/mobile/stk",
-                                                  "response_type": "Completed"
+                                                  "response_type": "Completed",
+                                                  "registration_status": "SUCCESS",
+                                                  "registration_failure_reason": null
                                                 }
                                               ],
                                               "message": "Data retrieved Successfully",
@@ -454,8 +469,8 @@ public class PaymentsResource {
     )
     @ApiResponses(value = {
             @ApiResponse(
-                    responseCode = "200",
-                    description = "Configuration updated successfully",
+                    responseCode = "202",
+                    description = "Configuration updated and asynchronous registration queued",
                     content = @Content(
                             mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = ResponseTemplate.class),
@@ -470,9 +485,11 @@ public class PaymentsResource {
                                                 "confirmation_url": "https://yourdomain.com/confirm",
                                                 "validation_url": "https://yourdomain.com/validate",
                                                 "stk_callback_url": "https://yourdomain.com/mobile/stk",
-                                                "response_type": "Completed"
+                                                "response_type": "Completed",
+                                                "registration_status": "PENDING",
+                                                "registration_failure_reason": null
                                               },
-                                              "message": "Configurations Updated Successfully",
+                                              "message": "Configuration updated. Daraja registration queued.",
                                               "error": null
                                             }
                                             """
@@ -500,11 +517,90 @@ public class PaymentsResource {
                     )
             )
             @RequestBody PaybillConfigRequest paybillConfig) {
-        PaybillConfig updatePayload = toPaybillEntity(paybillConfig);
+        PaybillConfig updatePayload;
+        try {
+            updatePayload = toPaybillEntity(paybillConfig);
+        } catch (IllegalArgumentException ex) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                    new ResponseTemplate<>(null, null, ex.getMessage())
+            );
+        }
         updatePayload.setUuid(uuid);
         PaybillConfig updated = paybillConfigService.update(updatePayload);
-        return ResponseEntity.status(HttpStatus.OK.value()).body(
-                new ResponseTemplate<>(toPaybillResponse(updated), "Configurations Updated Successfully", null)
+        return ResponseEntity.status(HttpStatus.ACCEPTED).body(
+                new ResponseTemplate<>(toPaybillResponse(updated), "Configuration updated. Daraja registration queued.", null)
+        );
+    }
+
+    @PostMapping("configure-paybill/{uuid}/retry")
+    @Operation(
+            summary = "Retry Failed Paybill Registration",
+            description = "Requeues Daraja URL registration for a previously failed paybill configuration.",
+            tags = {"Configuration Management"}
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "202",
+                    description = "Retry queued successfully",
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = ResponseTemplate.class),
+                            examples = @ExampleObject(
+                                    name = "Retry Queued",
+                                    value = """
+                                            {
+                                              "data": {
+                                                "uuid": "550e8400-e29b-41d4-a716-446655440000",
+                                                "paybill_no": 174379,
+                                                "organisation_name": "Example Ltd",
+                                                "confirmation_url": "https://yourdomain.com/confirm",
+                                                "validation_url": "https://yourdomain.com/validate",
+                                                "stk_callback_url": "https://yourdomain.com/mobile/stk",
+                                                "response_type": "Completed",
+                                                "registration_status": "PENDING",
+                                                "registration_failure_reason": null
+                                              },
+                                              "message": "Retry queued successfully",
+                                              "error": null
+                                            }
+                                            """
+                            )
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Configuration is not in failed state",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE)
+            )
+    })
+    public ResponseEntity<ResponseTemplate<?>> retryFailedPaybillConfiguration(
+            @Parameter(
+                    description = "UUID of the configuration to retry",
+                    required = true,
+                    example = "550e8400-e29b-41d4-a716-446655440000"
+            )
+            @PathVariable String uuid) {
+        PaybillConfig existing = paybillConfigService.retrievePaybillConfiguration(uuid, "uuid");
+        if (existing.getRegistrationStatus() != PaybillRegistrationStatus.FAILED) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                    new ResponseTemplate<>(
+                            toPaybillResponse(existing),
+                            null,
+                            "Only failed configurations can be retriggered."
+                    )
+            );
+        }
+        PaybillConfig retriggered;
+        try {
+            retriggered = paybillConfigService.retryFailedSubmission(uuid);
+        } catch (IllegalStateException ex) {
+            PaybillConfig latest = paybillConfigService.retrievePaybillConfiguration(uuid, "uuid");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                    new ResponseTemplate<>(toPaybillResponse(latest), null, ex.getMessage())
+            );
+        }
+        return ResponseEntity.status(HttpStatus.ACCEPTED).body(
+                new ResponseTemplate<>(toPaybillResponse(retriggered), "Retry queued successfully", null)
         );
     }
 
@@ -561,14 +657,19 @@ public class PaymentsResource {
         String responseType = paybillConfig.getResponseType() != null
                 ? paybillConfig.getResponseType().getResponse()
                 : null;
+        String registrationStatus = paybillConfig.getRegistrationStatus() != null
+                ? paybillConfig.getRegistrationStatus().getValue()
+                : null;
         return new PaybillConfigResponse(
                 paybillConfig.getUuid(),
                 paybillConfig.getPaybillNo(),
                 paybillConfig.getOrganisationName(),
-                paybillConfig.getConfirmationUrl(),
-                paybillConfig.getValidationUrl(),
-                paybillConfig.getStkCallbackUrl(),
-                responseType
+                decodeIfBase64(paybillConfig.getConfirmationUrl()),
+                decodeIfBase64(paybillConfig.getValidationUrl()),
+                decodeIfBase64(paybillConfig.getStkCallbackUrl()),
+                responseType,
+                registrationStatus,
+                paybillConfig.getRegistrationFailureReason()
         );
     }
 
@@ -586,8 +687,26 @@ public class PaymentsResource {
         paybillConfig.setValidationUrl(request.validationUrl());
         paybillConfig.setStkCallbackUrl(request.stkCallbackUrl());
         if (request.responseType() != null) {
-            paybillConfig.setResponseType(MpesaResponseType.valueOf(request.responseType().toUpperCase()));
+            try {
+                paybillConfig.setResponseType(MpesaResponseType.valueOf(request.responseType().toUpperCase()));
+            } catch (IllegalArgumentException ex) {
+                throw new IllegalArgumentException("Invalid response_type. Supported values: COMPLETED, CANCELLED");
+            }
         }
         return paybillConfig;
+    }
+
+    private String decodeIfBase64(String value) {
+        if (value == null) {
+            return null;
+        }
+        try {
+            byte[] decoded = Base64.getDecoder().decode(value);
+            String decodedValue = new String(decoded, StandardCharsets.UTF_8);
+            String encodedAgain = Base64.getEncoder().encodeToString(decodedValue.getBytes(StandardCharsets.UTF_8));
+            return encodedAgain.equals(value) ? decodedValue : value;
+        } catch (IllegalArgumentException ex) {
+            return value;
+        }
     }
 }

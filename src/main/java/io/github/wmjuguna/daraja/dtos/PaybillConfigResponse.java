@@ -31,6 +31,14 @@ public record PaybillConfigResponse(
 
         @JsonProperty("response_type")
         @Schema(description = "Response type", example = "Completed")
-        String responseType
+        String responseType,
+
+        @JsonProperty("registration_status")
+        @Schema(description = "Daraja registration status", example = "PENDING")
+        String registrationStatus,
+
+        @JsonProperty("registration_failure_reason")
+        @Schema(description = "Latest registration failure reason", example = "Authentication failed")
+        String registrationFailureReason
 ) {
 }

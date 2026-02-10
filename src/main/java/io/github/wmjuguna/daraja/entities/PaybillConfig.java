@@ -1,7 +1,5 @@
 package io.github.wmjuguna.daraja.entities;
 
-import io.github.wmjuguna.daraja.utils.MpesaResponseType;
-import io.github.wmjuguna.daraja.utils.converters.MpesaResponseTypeConverter;
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
@@ -11,6 +9,11 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+
+import io.github.wmjuguna.daraja.utils.MpesaResponseType;
+import io.github.wmjuguna.daraja.utils.PaybillRegistrationStatus;
+import io.github.wmjuguna.daraja.utils.converters.MpesaResponseTypeConverter;
+import io.github.wmjuguna.daraja.utils.converters.PaybillRegistrationStatusConverter;
 
 @Entity
 @Table(name = "merchant_config")
@@ -39,4 +42,11 @@ public class PaybillConfig extends BaseEntity {
     @Column(name = "response_type")
     @Convert(converter = MpesaResponseTypeConverter.class)
     private MpesaResponseType responseType;
+
+    @Column(name = "registration_status")
+    @Convert(converter = PaybillRegistrationStatusConverter.class)
+    private PaybillRegistrationStatus registrationStatus;
+
+    @Column(name = "registration_failure_reason")
+    private String registrationFailureReason;
 }
