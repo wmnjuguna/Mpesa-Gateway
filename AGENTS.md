@@ -104,7 +104,8 @@ private RelatedEntity relatedEntity;
 - H2 is the test DB; Flyway should be disabled in tests.
 
 ## Commits
-- Follow git conventions with a single summarized line per commit message.
+- All commit messages must follow git conventions, using a single summarized line.
+- Branch checkouts and branch naming must follow git conventions.
 
 ## External Rules
 - No Cursor rules found (.cursor/rules or .cursorrules not present).
