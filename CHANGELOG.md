@@ -1,3 +1,10 @@
+## [1.5.5](https://github.com/wmnjuguna/Mpesa-Gateway/compare/v1.5.4...v1.5.5) (2026-02-10)
+
+
+### Bug Fixes
+
+* add EdDSA fallback JWT verification for OKP keys ([5549d25](https://github.com/wmnjuguna/Mpesa-Gateway/commit/5549d2569f9944ced73a0309d9a7bb5b57fb6dfb))
+
 ## [1.5.4](https://github.com/wmnjuguna/Mpesa-Gateway/compare/v1.5.3...v1.5.4) (2026-02-10)
 
 
