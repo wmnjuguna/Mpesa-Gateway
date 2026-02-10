@@ -1,3 +1,10 @@
+# [1.5.0](https://github.com/wmnjuguna/Mpesa-Gateway/compare/v1.4.1...v1.5.0) (2026-02-10)
+
+
+### Features
+
+* **security:** add EdDSA JWT algorithm support for Keycloak ([e6c8d01](https://github.com/wmnjuguna/Mpesa-Gateway/commit/e6c8d01f9e27f0ae7ae74e5aebf8d26bf3b49f52))
+
 ## [1.4.1](https://github.com/wmnjuguna/Mpesa-Gateway/compare/v1.4.0...v1.4.1) (2026-02-10)
 
 
