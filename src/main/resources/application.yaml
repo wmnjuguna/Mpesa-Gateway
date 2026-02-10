@@ -38,6 +38,9 @@ spring:
           jwk-set-uri: ${KEYCLOAK_JWK_SET_URI:${KEYCLOAK_ISSUER_URI:http://localhost:8080/realms/mpesa}/protocol/openid-connect/certs}
 
   http:
+    client:
+      connect-timeout: 5s
+      read-timeout: 30s
     serviceclient:
       daraja:
         base-url: ${payments.mpesa.base-url:https://api.safaricom.co.ke}
