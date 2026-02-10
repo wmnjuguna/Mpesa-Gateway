@@ -52,14 +52,13 @@ public class SecurityConfig {
     public JwtDecoder jwtDecoder(
             @Value("${spring.security.oauth2.resourceserver.jwt.issuer-uri}") String issuerUri,
             @Value("${spring.security.oauth2.resourceserver.jwt.jwk-set-uri}") String jwkSetUri,
-            @Value("${security.oauth2.required-audience:}") String requiredAudience
+            @Value("${security.oauth2.required-audience}") String requiredAudience
     ) {
+        if (requiredAudience == null || requiredAudience.isBlank()) {
+            throw new IllegalStateException("security.oauth2.required-audience must be configured");
+        }
         NimbusJwtDecoder jwtDecoder = NimbusJwtDecoder.withJwkSetUri(jwkSetUri).build();
         OAuth2TokenValidator<Jwt> withIssuer = JwtValidators.createDefaultWithIssuer(issuerUri);
-        if (requiredAudience == null || requiredAudience.isBlank()) {
-            jwtDecoder.setJwtValidator(withIssuer);
-            return jwtDecoder;
-        }
         OAuth2TokenValidator<Jwt> withAudience = token -> {
             List<String> audience = token.getAudience();
             if (audience != null && audience.contains(requiredAudience)) {

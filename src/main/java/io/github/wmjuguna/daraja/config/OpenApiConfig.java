@@ -10,6 +10,7 @@ import io.swagger.v3.oas.models.security.SecurityScheme;
 import io.swagger.v3.oas.models.servers.Server;
 import io.swagger.v3.oas.models.tags.Tag;
 import org.springdoc.core.models.GroupedOpenApi;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -37,7 +38,11 @@ public class OpenApiConfig {
     }
 
     @Bean
-    public OpenAPI darajaOpenAPI() {
+    public OpenAPI darajaOpenAPI(@Value("${spring.security.oauth2.resourceserver.jwt.issuer-uri}") String issuerUri) {
+        String openIdConfigurationUrl = issuerUri.endsWith("/")
+                ? issuerUri + ".well-known/openid-configuration"
+                : issuerUri + "/.well-known/openid-configuration";
+
         return new OpenAPI()
                 .info(new Info()
                         .title("Daraja M-Pesa Gateway API")
@@ -73,12 +78,11 @@ public class OpenApiConfig {
                                 .name("Payment Reports")
                                 .description("Payment transaction reporting and analytics")))
                 .components(new Components().addSecuritySchemes(
-                        "bearerAuth",
+                        "oidc",
                         new SecurityScheme()
-                                .type(SecurityScheme.Type.HTTP)
-                                .scheme("bearer")
-                                .bearerFormat("JWT")
+                                .type(SecurityScheme.Type.OPENIDCONNECT)
+                                .openIdConnectUrl(openIdConfigurationUrl)
                 ))
-                .addSecurityItem(new SecurityRequirement().addList("bearerAuth"));
+                .addSecurityItem(new SecurityRequirement().addList("oidc"));
     }
 }

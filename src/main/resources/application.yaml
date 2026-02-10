@@ -49,6 +49,12 @@ security:
   oauth2:
     required-audience: ${KEYCLOAK_RESOURCE_CLIENT_ID:mpesa-gateway-api}
 
+springdoc:
+  swagger-ui:
+    oauth:
+      client-id: ${KEYCLOAK_SWAGGER_CLIENT_ID:swagger-ui}
+      use-pkce-with-authorization-code-grant: true
+
 payments:
   mpesa:
     base-url: https://api.safaricom.co.ke
