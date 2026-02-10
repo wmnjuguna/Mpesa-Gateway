@@ -1,22 +1,19 @@
 package io.github.wmjuguna.daraja;
 
+import io.github.wmjuguna.daraja.integrations.DarajaApiClient;
 import org.springframework.boot.SpringApplication;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import org.springframework.boot.http.client.autoconfigure.ImportHttpServices;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.scheduling.annotation.EnableScheduling;
-import org.springframework.web.client.RestTemplate;
 
 @SpringBootApplication
 @EnableScheduling
+@ImportHttpServices(group = "daraja", types = DarajaApiClient.class)
 public class PaymentsApplication {
-
-	@Bean
-	public RestTemplate restTemplate() {
-		return new RestTemplate();
-	}
 
 	@Bean
 	public ObjectMapper objectMapper() {

@@ -5,88 +5,80 @@ import io.github.wmjuguna.daraja.dtos.PaymentConfirmationRequest;
 import io.github.wmjuguna.daraja.dtos.ResponseTemplate;
 import io.github.wmjuguna.daraja.dtos.Responses.AuthorizationResponse;
 import io.github.wmjuguna.daraja.dtos.Responses.MpesaExpressResponseDTO;
-import io.github.wmjuguna.daraja.dtos.Responses.URLRegistrationResponseDTO;
 import io.github.wmjuguna.daraja.dtos.URLRegistrationRequestDTO;
 import io.github.wmjuguna.daraja.exceptions.AuthenticationFailed;
 import io.github.wmjuguna.daraja.exceptions.StkPushFailed;
-import io.github.wmjuguna.daraja.utils.MpesaStaticStrings;
+import io.github.wmjuguna.daraja.integrations.DarajaApiClient;
 import lombok.NonNull;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.*;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.web.client.RestClient;
+import org.springframework.web.client.RestClientException;
 
-import java.util.List;
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.Objects;
 
 @Component
-@Slf4j
 public class MpesaActions {
-    @Autowired
-    private RestTemplate template;
+    private final DarajaApiClient darajaApiClient;
+    private final RestClient restClient;
 
-    @Value("${payments.mpesa.stk-push-url}")
-    private String mpesaExpressUrl;
-
-    @Value("${payments.mpesa.authentication-url}")
-    private String authenticationUrl;
-
-    @Value("${payments.mpesa.url-registration}")
-    private String urlRegistrationUrl;
+    public MpesaActions(DarajaApiClient darajaApiClient, RestClient.Builder restClientBuilder) {
+        this.darajaApiClient = darajaApiClient;
+        this.restClient = restClientBuilder.build();
+    }
 
 
     public AuthorizationResponse authenticate(String consumerSecret, String consumerKey) {
-        HttpHeaders headers = new HttpHeaders();
-        headers.setBasicAuth(consumerKey, consumerSecret);
-        HttpEntity<Void> requestEntity = new HttpEntity<>(headers);
-        ResponseEntity<AuthorizationResponse> response = template.exchange(authenticationUrl, HttpMethod.GET, requestEntity, AuthorizationResponse.class);
-        if(!response.getStatusCode().is2xxSuccessful()){
+        try {
+            AuthorizationResponse response = darajaApiClient.authenticate(
+                    basicAuthorizationHeader(consumerKey, consumerSecret)
+            );
+            if (Objects.isNull(response) || Objects.isNull(response.accessToken())) {
+                throw new AuthenticationFailed();
+            }
+            return response;
+        } catch (RestClientException ex) {
             throw new AuthenticationFailed();
         }
-        return response.getBody();
     }
 
     public MpesaExpressResponseDTO lipaNaMpesaOnline(MpesaExpressRequestDTO request, String consumerSecret, String consumerKey){
         AuthorizationResponse response = authenticate(consumerSecret, consumerKey);
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.setBearerAuth(response.accessToken());
-        HttpEntity<MpesaExpressRequestDTO> requestEntity = new HttpEntity<>(request, headers);
-        ResponseEntity<MpesaExpressResponseDTO> responseEntity = template.exchange(mpesaExpressUrl, HttpMethod.POST,
-                requestEntity, MpesaExpressResponseDTO.class);
-        if(!responseEntity.getStatusCode().is2xxSuccessful()){
+        try {
+            MpesaExpressResponseDTO paymentResponse = darajaApiClient.lipaNaMpesaOnline(
+                    bearerAuthorizationHeader(response.accessToken()),
+                    request
+            );
+            if (Objects.isNull(paymentResponse)) {
+                throw new StkPushFailed();
+            }
+            return paymentResponse;
+        } catch (RestClientException ex) {
             throw new StkPushFailed();
         }
-        return responseEntity.getBody();
     }
 
     public void registerURl(@NonNull String consumerSecret, @NonNull String consumerKey, @NonNull String confirmationUrl,
                             @NonNull String validationUrl, int shortCode, @NonNull String responseType){
         AuthorizationResponse response =  authenticate(consumerSecret, consumerKey);
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.setBearerAuth(response.accessToken());
         URLRegistrationRequestDTO request = new URLRegistrationRequestDTO(
                 confirmationUrl,
                 responseType,
                 String.valueOf(shortCode),
                 validationUrl
         );
-        HttpEntity<URLRegistrationRequestDTO> requestEntity = new HttpEntity<>(request, headers);
-        ResponseEntity<URLRegistrationResponseDTO> responseEntity = template.exchange(urlRegistrationUrl, HttpMethod.POST,
-                requestEntity, URLRegistrationResponseDTO.class);
-        responseEntity.getBody();
+        darajaApiClient.registerUrl(
+                bearerAuthorizationHeader(response.accessToken()),
+                request
+        );
     }
 
     public void callBackWithConfirmationOrFailure( String paymentReference, double amount, String receiptNo, String callbackUrl, int resultCode){
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.setAccept(List.of(MediaType.APPLICATION_JSON));
         if(Objects.isNull(callbackUrl)) return;
         if(resultCode == 0){
-            ResponseTemplate<PaymentConfirmationRequest> request = new ResponseTemplate<>(
+            ResponseTemplate<PaymentConfirmationRequest> requestPayload = new ResponseTemplate<>(
                     new PaymentConfirmationRequest(
                             paymentReference,
                             receiptNo,
@@ -96,18 +88,38 @@ public class MpesaActions {
                     MpesaStaticStrings.PAYMENT_SUCCESSFUL,
                     null
             );
-
-            HttpEntity<ResponseTemplate<PaymentConfirmationRequest>> requestHttpEntity = new HttpEntity<>(request, headers);
-            template.exchange(callbackUrl, HttpMethod.POST, requestHttpEntity, Void.class);
+            restClient.post()
+                    .uri(callbackUrl)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .accept(MediaType.APPLICATION_JSON)
+                    .body(requestPayload)
+                    .retrieve()
+                    .toBodilessEntity();
         }
         else {
-            ResponseTemplate<?> request = new ResponseTemplate<>(null, null, MpesaStaticStrings.PAYMENT_UNSUCCESSFUL);
-            HttpEntity<ResponseTemplate<?>> requestHttpEntity = new HttpEntity<>(request, headers);
-            template.exchange(callbackUrl, HttpMethod.POST, requestHttpEntity, Void.class);
+            ResponseTemplate<?> requestPayload = new ResponseTemplate<>(null, null, MpesaStaticStrings.PAYMENT_UNSUCCESSFUL);
+            restClient.post()
+                    .uri(callbackUrl)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .accept(MediaType.APPLICATION_JSON)
+                    .body(requestPayload)
+                    .retrieve()
+                    .toBodilessEntity();
         }
     }
 
     public void bulkDisbursement(){
         
+    }
+
+    private String basicAuthorizationHeader(String consumerKey, String consumerSecret) {
+        String credentials = consumerKey + ":" + consumerSecret;
+        String encodedCredentials = Base64.getEncoder()
+                .encodeToString(credentials.getBytes(StandardCharsets.UTF_8));
+        return "Basic " + encodedCredentials;
+    }
+
+    private String bearerAuthorizationHeader(String accessToken) {
+        return "Bearer " + accessToken;
     }
 }

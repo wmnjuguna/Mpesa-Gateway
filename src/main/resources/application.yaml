@@ -37,12 +37,18 @@ spring:
           issuer-uri: ${KEYCLOAK_ISSUER_URI:http://localhost:8080/realms/mpesa}
           jwk-set-uri: ${KEYCLOAK_JWK_SET_URI:${KEYCLOAK_ISSUER_URI:http://localhost:8080/realms/mpesa}/protocol/openid-connect/certs}
 
+  http:
+    serviceclient:
+      daraja:
+        base-url: ${payments.mpesa.base-url:https://api.safaricom.co.ke}
+
 security:
   oauth2:
     required-audience: ${KEYCLOAK_RESOURCE_CLIENT_ID:mpesa-gateway-api}
 
 payments:
   mpesa:
+    base-url: https://api.safaricom.co.ke
     url-registration: https://api.safaricom.co.ke/mpesa/c2b/v1/registerurl
     authentication-url: https://api.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials
     stk-push-url: https://api.safaricom.co.ke/mpesa/stkpush/v1/processrequest
