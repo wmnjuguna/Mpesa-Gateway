@@ -1,3 +1,10 @@
+## [1.4.1](https://github.com/wmnjuguna/Mpesa-Gateway/compare/v1.4.0...v1.4.1) (2026-02-10)
+
+
+### Bug Fixes
+
+* **openapi:** enforce single tag per operation ([caee943](https://github.com/wmnjuguna/Mpesa-Gateway/commit/caee943c0ab3cc3ea54d52b978a36c6a0db673ed))
+
 # [1.4.0](https://github.com/wmnjuguna/Mpesa-Gateway/compare/v1.3.1...v1.4.0) (2026-02-10)
 
 
