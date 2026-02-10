@@ -1,3 +1,10 @@
+## [1.5.1](https://github.com/wmnjuguna/Mpesa-Gateway/compare/v1.5.0...v1.5.1) (2026-02-10)
+
+
+### Bug Fixes
+
+* **security:** register Tink signature primitives for EdDSA support ([824e1eb](https://github.com/wmnjuguna/Mpesa-Gateway/commit/824e1eb655e6a620caaeb843787360731ab747f4))
+
 # [1.5.0](https://github.com/wmnjuguna/Mpesa-Gateway/compare/v1.4.1...v1.5.0) (2026-02-10)
 
 
