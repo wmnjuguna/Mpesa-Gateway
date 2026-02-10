@@ -4,8 +4,11 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.text.ParseException;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
+import com.nimbusds.jose.jwk.JWK;
+import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jwt.SignedJWT;
 import lombok.extern.slf4j.Slf4j;
 import com.nimbusds.jose.JWSAlgorithm;
@@ -136,19 +139,23 @@ public class SecurityConfig {
                 }
                 return jwt;
             } catch (JwtException ex) {
-                logJwtDecodeFailure(token, ex);
+                logJwtDecodeFailure(token, ex, jwkSetUri);
                 throw ex;
             }
         };
     }
 
-    private void logJwtDecodeFailure(String token, JwtException ex) {
+    private void logJwtDecodeFailure(String token, JwtException ex, String jwkSetUri) {
+        Throwable rootCause = getRootCause(ex);
         int tokenLength = token != null ? token.length() : 0;
         int tokenSegments = token == null || token.isBlank() ? 0 : token.split("\\.", -1).length;
         if (token == null || token.isBlank()) {
             log.error(
-                    "JWT decode failed: message='{}', tokenMissing=true, tokenLength={}, tokenSegments={}",
+                    "JWT decode failed: message='{}', exceptionType='{}', rootCauseType='{}', rootCauseMessage='{}', tokenMissing=true, tokenLength={}, tokenSegments={}",
                     ex.getMessage(),
+                    ex.getClass().getName(),
+                    rootCause.getClass().getName(),
+                    rootCause.getMessage(),
                     tokenLength,
                     tokenSegments
             );
@@ -158,8 +165,11 @@ public class SecurityConfig {
         try {
             SignedJWT signedJwt = SignedJWT.parse(token);
             log.error(
-                    "JWT decode failed: message='{}', alg='{}', kid='{}', iss='{}', aud='{}', tokenLength={}, tokenSegments={}",
+                    "JWT decode failed: message='{}', exceptionType='{}', rootCauseType='{}', rootCauseMessage='{}', alg='{}', kid='{}', iss='{}', aud='{}', tokenLength={}, tokenSegments={}",
                     ex.getMessage(),
+                    ex.getClass().getName(),
+                    rootCause.getClass().getName(),
+                    rootCause.getMessage(),
                     signedJwt.getHeader().getAlgorithm(),
                     signedJwt.getHeader().getKeyID(),
                     signedJwt.getJWTClaimsSet().getIssuer(),
@@ -167,14 +177,62 @@ public class SecurityConfig {
                     tokenLength,
                     tokenSegments
             );
+            logJwkLookupDiagnostics(jwkSetUri, signedJwt.getHeader().getKeyID(), signedJwt.getHeader().getAlgorithm().getName());
         } catch (ParseException parseException) {
             log.error(
-                    "JWT decode failed: message='{}', parseError='{}', tokenLength={}, tokenSegments={}",
+                    "JWT decode failed: message='{}', exceptionType='{}', rootCauseType='{}', rootCauseMessage='{}', parseError='{}', tokenLength={}, tokenSegments={}",
                     ex.getMessage(),
+                    ex.getClass().getName(),
+                    rootCause.getClass().getName(),
+                    rootCause.getMessage(),
                     parseException.getMessage(),
                     tokenLength,
                     tokenSegments
             );
         }
+    }
+
+    private void logJwkLookupDiagnostics(String jwkSetUri, String kid, String alg) {
+        try {
+            JWKSet jwkSet = JWKSet.load(URI.create(jwkSetUri).toURL());
+            List<JWK> keys = jwkSet.getKeys();
+            long kidMatches = keys.stream()
+                    .filter(key -> Objects.equals(key.getKeyID(), kid))
+                    .count();
+            long algMatches = keys.stream()
+                    .filter(key -> key.getAlgorithm() != null && Objects.equals(key.getAlgorithm().getName(), alg))
+                    .count();
+            long kidAndAlgMatches = keys.stream()
+                    .filter(key -> Objects.equals(key.getKeyID(), kid))
+                    .filter(key -> key.getAlgorithm() != null && Objects.equals(key.getAlgorithm().getName(), alg))
+                    .count();
+            log.error(
+                    "JWT JWK diagnostics: jwkSetUri='{}', totalKeys={}, kid='{}', alg='{}', kidMatches={}, algMatches={}, kidAndAlgMatches={}",
+                    jwkSetUri,
+                    keys.size(),
+                    kid,
+                    alg,
+                    kidMatches,
+                    algMatches,
+                    kidAndAlgMatches
+            );
+        } catch (Exception jwkException) {
+            log.error(
+                    "JWT JWK diagnostics failed: jwkSetUri='{}', kid='{}', alg='{}', exceptionType='{}', message='{}'",
+                    jwkSetUri,
+                    kid,
+                    alg,
+                    jwkException.getClass().getName(),
+                    jwkException.getMessage()
+            );
+        }
+    }
+
+    private Throwable getRootCause(Throwable throwable) {
+        Throwable root = throwable;
+        while (root.getCause() != null) {
+            root = root.getCause();
+        }
+        return root;
     }
 }
